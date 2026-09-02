@@ -20,7 +20,7 @@ class TestInstructions(Document):
 		parenttype: DF.Data
 		result_type: DF.Literal["Positive", "Negative", "Value"]
 		result_value: DF.Data | None
-		test_name: DF.Literal["Malaria", "Dengue", "Leptospirosis", "Hb", "GRBS"]
+		test_name: DF.Link | None
 	# end: auto-generated types
 
 	pass

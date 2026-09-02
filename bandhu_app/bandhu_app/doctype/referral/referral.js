@@ -1,16 +1,14 @@
 // Copyright (c) 2026, CMID and contributors
 // For license information, please see license.txt
 
-// frappe.ui.form.on("Referral", {
-// 	refresh(frm) {
-
-// 	},
-// });
-
 frappe.ui.form.on("Referral", {
 	onload: function (frm) {
+		// Stamping these on an already-saved referral marked the form dirty the moment it opened,
+		// so simply reading one raised "Not Saved" and a leave-page prompt.
+		if (!frm.is_new()) return;
+
 		frm.set_value("created_by", frm.doc.owner);
-		frm.set_value("created_on", frm.doc.creation);
+		frm.set_value("created_on", frappe.datetime.now_datetime());
 	},
 });
 

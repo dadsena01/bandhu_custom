@@ -25,6 +25,4 @@ class BandhuSettings(Document):
 		# An unbounded horizon would have the nightly job create sessions for every
 		# site until the end of time on its first run.
 		if self.session_horizon_days and self.session_horizon_days > MAX_HORIZON_DAYS:
-			frappe.throw(
-				_("Sessions cannot be generated more than {0} days ahead.").format(MAX_HORIZON_DAYS)
-			)
+			frappe.throw(_("Sessions cannot be generated more than {0} days ahead.").format(MAX_HORIZON_DAYS))

@@ -2,7 +2,7 @@
 	--max-w: var(--page-max-width, 1000px);
 	max-width: var(--max-w);
 	margin: 0 auto;
-	padding: 0 var(--padding-md);
+	padding: 0 var(--padding-md) var(--padding-2xl);
 }
 
 .nurse-dash .upcoming-card {
@@ -60,13 +60,15 @@
 }
 
 .nurse-dash .empty-state .empty-state-icon {
-	font-size: 32px;
+	width: 32px;
+	height: 32px;
 	margin-bottom: 10px;
 	opacity: 0.4;
 }
 
 .nurse-dash .empty-state .empty-state-icon.small {
-	font-size: 24px;
+	width: 24px;
+	height: 24px;
 	margin-bottom: 8px;
 }
 
@@ -86,8 +88,11 @@
 	margin-top: var(--margin-sm);
 }
 
+/* Frappe's own templates/styles/standard.css sets `.table { margin: 20px 0 }`; zeroing only
+   the bottom leaves that top margin showing as an empty strip inside .table-wrap's border,
+   above the header row. */
 .nurse-dash .table {
-	margin-bottom: 0;
+	margin: 0;
 	min-width: 480px;
 }
 
@@ -156,12 +161,10 @@
 	color: var(--border-color);
 }
 
-.nurse-dash .session-bar .session-dot {
-	font-size: 8px;
-}
-
-.nurse-dash .session-bar .session-dot.running {
-	color: var(--green-500);
+/* Desk's own .icon ships `margin: 0 auto`; in this flex row those auto margins swallow the
+   free space and fling each icon away from the label it belongs to. */
+.nurse-dash .session-bar .icon {
+	margin: 0;
 }
 
 .nurse-dash .welcome {
@@ -195,23 +198,6 @@
 	white-space: nowrap;
 }
 
-.detail-row {
-	display: flex;
-	justify-content: space-between;
-	gap: 12px;
-	padding: 4px 0;
-	border-bottom: 1px solid var(--border-color);
-	font-size: var(--text-sm);
-}
-
-.detail-row span:first-child {
-	color: var(--text-muted);
-}
-
-.detail-heading {
-	margin-top: 16px;
-}
-
 @media (max-width: 768px) {
 	.nurse-dash {
 		padding: 0 var(--padding-sm);
@@ -225,4 +211,30 @@
 	.nurse-dash .table th {
 		padding: 8px 10px;
 	}
+}
+
+.bandhu-load-error {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--margin-md);
+	max-width: var(--page-max-width, 1000px);
+	margin: var(--margin-md) auto;
+	padding: var(--padding-2xl) var(--padding-md);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius-md);
+	background: var(--bg-color);
+	color: var(--text-muted);
+	text-align: center;
+}
+
+.bandhu-load-error .load-error-icon {
+	width: 32px;
+	height: 32px;
+	opacity: 0.4;
+}
+
+.bandhu-load-error .load-error-retry {
+	min-height: 44px;
+	padding: 0 var(--padding-lg);
 }

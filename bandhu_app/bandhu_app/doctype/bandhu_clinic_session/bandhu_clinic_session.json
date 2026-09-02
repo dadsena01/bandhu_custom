@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "CS-.YY.-.MM.-.DD.-.site.-.###",
+ "autoname": "CS-.date.-.site.-.###",
  "creation": "2026-04-13 08:14:19.128869",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -9,6 +9,7 @@
   "clinic",
   "status",
   "site",
+  "site_name",
   "project",
   "unit",
   "session_schedule",
@@ -52,6 +53,14 @@
    "label": "Site",
    "options": "Site",
    "reqd": 1
+  },
+  {
+   "fetch_from": "site.site_name",
+   "fieldname": "site_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Site Name",
+   "read_only": 1
   },
   {
    "description": "Its numeric code becomes the third digit of every Clinic ID issued in this session.",
@@ -222,6 +231,14 @@
   {
    "read": 1,
    "role": "Clinic Assistant cum Driver"
+  },
+  {
+   "read": 1,
+   "role": "Director"
+  },
+  {
+   "read": 1,
+   "role": "Programme Manager"
   }
  ],
  "quick_entry": 1,
@@ -230,5 +247,6 @@
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
- "title_field": "site"
+ "title_field": "site_name",
+ "show_title_field_in_link": 1
 }

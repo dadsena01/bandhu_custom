@@ -57,3 +57,11 @@ jspm_packages/
 .claude/
 
 TEST_CREDENTIALS.txt
+
+# Working notes kept beside the code, not shipped with it
+AUDIT_FINDINGS.md
+CLAUDE.md
+LEARNINGS.md
+SCOPE_GAP_ANALYSIS.md
+TODO.md
+STAFF_ONBOARDING_TEST_CHECKLIST.txt

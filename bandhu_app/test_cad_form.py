@@ -3,9 +3,11 @@
 
 import frappe
 from frappe.tests import IntegrationTestCase
-from frappe.utils import today
+from frappe.utils import getdate, today
 
+from bandhu_app.bandhu_app.baseline_test_fixtures import ensure_baseline_fixtures
 from bandhu_app.bandhu_app.page.cad_form.cad_form import (
+	cancel_visit,
 	create_encounter,
 	get_form_options,
 	get_patient_card_html,
@@ -24,9 +26,10 @@ class IntegrationTestCadForm(IntegrationTestCase):
 	def setUpClass(cls):
 		super().setUpClass()
 
-		cls.clinic = frappe.get_all("Clinic", limit=1, pluck="name")[0]
-		cls.site = frappe.get_all("Site", limit=1, pluck="name")[0]
-		cls.project = frappe.get_all("Bandhu Projects", limit=1, pluck="name")[0]
+		baseline = ensure_baseline_fixtures()
+		cls.clinic = baseline["clinic"]
+		cls.site = baseline["site"]
+		cls.project = baseline["project"]
 		cls.gender = frappe.get_all("Gender", limit=1, pluck="name")[0]
 
 		cls.cad_practitioner = cls._make_practitioner("Test CAD Alpha", "Clinic Assistant cum Driver")
@@ -140,6 +143,72 @@ class IntegrationTestCadForm(IntegrationTestCase):
 		self.assertEqual(doc.custom_abha_id, "ABHA-TEST-001")
 		self.assertTrue(doc.custom_bandhu_id)
 
+	def test_register_patient_estimates_dob_from_age_when_dob_unknown(self):
+		frappe.set_user(self.cad_user)
+		try:
+			patient_name = register_patient(
+				full_name="Test Age Only Patient",
+				sex=self.gender,
+				age=40,
+			)
+		finally:
+			frappe.set_user("Administrator")
+
+		doc = frappe.get_doc("Patient", patient_name)
+		# Jan 1 of the birth year, not today's month/day minus 40 years — a migrant worker who
+		# only knows their age didn't just have a birthday today, so that would be a fake date.
+		self.assertEqual(str(doc.dob), f"{getdate().year - 40}-01-01")
+
+	def test_register_patient_prefers_explicit_dob_over_age(self):
+		frappe.set_user(self.cad_user)
+		try:
+			patient_name = register_patient(
+				full_name="Test Dob Wins Patient",
+				dob="1990-05-15",
+				sex=self.gender,
+				age=40,
+			)
+		finally:
+			frappe.set_user("Administrator")
+
+		doc = frappe.get_doc("Patient", patient_name)
+		self.assertEqual(str(doc.dob), "1990-05-15")
+
+	def test_register_patient_rejects_missing_dob_and_age(self):
+		frappe.set_user(self.cad_user)
+		try:
+			with self.assertRaises(frappe.ValidationError):
+				register_patient(full_name="Test No Dob No Age Patient", sex=self.gender)
+		finally:
+			frappe.set_user("Administrator")
+
+	def test_register_patient_rejects_implausible_age(self):
+		frappe.set_user(self.cad_user)
+		try:
+			with self.assertRaises(frappe.ValidationError):
+				register_patient(full_name="Test Implausible Age Patient", sex=self.gender, age=200)
+		finally:
+			frappe.set_user("Administrator")
+
+	def test_register_patient_stores_country_and_specified_sector(self):
+		frappe.set_user(self.cad_user)
+		try:
+			patient_name = register_patient(
+				full_name="Test Country Sector Patient",
+				dob="1990-05-15",
+				sex=self.gender,
+				native_country="Nepal",
+				occupation="Other",
+				specify_sector="Street vendor",
+			)
+		finally:
+			frappe.set_user("Administrator")
+
+		doc = frappe.get_doc("Patient", patient_name)
+		self.assertEqual(doc.custom_native_country, "Nepal")
+		self.assertEqual(doc.custom_sector_of_employment, "Other")
+		self.assertEqual(doc.custom_specify_employment_sector, "Street vendor")
+
 	def test_register_patient_rejects_negative_height(self):
 		frappe.set_user(self.cad_user)
 		try:
@@ -186,8 +255,13 @@ class IntegrationTestCadForm(IntegrationTestCase):
 		finally:
 			frappe.set_user("Administrator")
 
-		self.assertIn("Kerala", options["states"])
-		self.assertTrue(len(options["sectors"]) > 0)
+		self.assertIn("Kerala", options["other_states"])
+		self.assertIn("Bihar", options["major_states"])
+		self.assertNotIn("Kerala", options["major_states"])
+		self.assertIn("Construction", options["major_sectors"])
+		self.assertIn("India", options["quick_countries"])
+		self.assertIn("Nepal", options["quick_countries"])
+		self.assertNotIn("India", options["other_countries"])
 
 	def test_register_patient_rejects_state_not_in_master(self):
 		frappe.set_user(self.cad_user)
@@ -226,7 +300,9 @@ class IntegrationTestCadForm(IntegrationTestCase):
 
 	def test_create_encounter_rejects_session_not_yet_started(self):
 		patient = self._make_patient("Test Not Started Patient")
-		planned_session = self._make_session(self.cad_practitioner, self.doctor_practitioner, status="Planned")
+		planned_session = self._make_session(
+			self.cad_practitioner, self.doctor_practitioner, status="Planned"
+		)
 
 		frappe.set_user(self.cad_user)
 		try:
@@ -236,6 +312,91 @@ class IntegrationTestCadForm(IntegrationTestCase):
 			frappe.set_user("Administrator")
 
 		self.assertFalse(frappe.db.exists("Patient Encounter", {"patient": patient.name}))
+
+	def test_cancel_visit_ends_the_encounter_and_clears_the_queue_row(self):
+		patient = self._make_patient("Test Walkout Patient")
+
+		frappe.set_user(self.cad_user)
+		try:
+			encounter_name = create_encounter(patient.name, self.session)
+			cancel_visit(encounter_name, self.session)
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(
+			frappe.db.get_value("Patient Encounter", encounter_name, "custom_workflow_state"),
+			"Cancelled",
+		)
+
+		queue_row = frappe.db.get_value(
+			"Patient Queue",
+			{"encounter": encounter_name},
+			["current_stage", "status"],
+			as_dict=True,
+		)
+		self.assertEqual(queue_row.current_stage, "Cancelled")
+		self.assertEqual(queue_row.status, "Done")
+
+	def test_cancel_visit_rejects_an_encounter_from_another_session(self):
+		patient = self._make_patient("Test Cross Session Patient")
+		other_session = self._make_session(self.cad_practitioner, self.doctor_practitioner)
+
+		frappe.set_user(self.cad_user)
+		try:
+			encounter_name = create_encounter(patient.name, self.session)
+			with self.assertRaises(frappe.ValidationError):
+				cancel_visit(encounter_name, other_session)
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertEqual(
+			frappe.db.get_value("Patient Encounter", encounter_name, "custom_workflow_state"),
+			"Waiting for Doctor",
+		)
+
+	def test_cancel_visit_cannot_be_repeated(self):
+		patient = self._make_patient("Test Double Cancel Patient")
+
+		frappe.set_user(self.cad_user)
+		try:
+			encounter_name = create_encounter(patient.name, self.session)
+			cancel_visit(encounter_name, self.session)
+			with self.assertRaises(frappe.ValidationError):
+				cancel_visit(encounter_name, self.session)
+		finally:
+			frappe.set_user("Administrator")
+
+	# A patient who left and came back the same day must be registerable again; the cancelled
+	# encounter used to satisfy create_encounter's "already registered" lookup and be handed back.
+	def test_a_cancelled_visit_does_not_block_re_registration(self):
+		patient = self._make_patient("Test Returning Patient")
+
+		frappe.set_user(self.cad_user)
+		try:
+			first = create_encounter(patient.name, self.session)
+			cancel_visit(first, self.session)
+			second = create_encounter(patient.name, self.session)
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertNotEqual(first, second)
+		self.assertEqual(
+			frappe.db.get_value("Patient Encounter", second, "custom_workflow_state"),
+			"Waiting for Doctor",
+		)
+
+	def test_get_today_queue_carries_the_encounter_for_each_row(self):
+		patient = self._make_patient("Test Queue Encounter Patient")
+
+		frappe.set_user(self.cad_user)
+		try:
+			encounter_name = create_encounter(patient.name, self.session)
+			rows = get_today_queue(self.session)
+		finally:
+			frappe.set_user("Administrator")
+
+		row = next(row for row in rows if row["patient"] == patient.name)
+		self.assertEqual(row["encounter"], encounter_name)
 
 	def test_get_patient_card_html_renders_for_cad_without_patient_permission(self):
 		patient = self._make_patient("Test Card Patient")
@@ -316,3 +477,57 @@ class IntegrationTestCadForm(IntegrationTestCase):
 			self.assertRaises(frappe.PermissionError, get_patient_card_html, patient.name)
 		finally:
 			frappe.set_user("Administrator")
+
+	def test_search_patient_is_recorded_in_the_access_log(self):
+		patient = self._make_patient("Test Audited Search Patient")
+		bandhu_id = frappe.db.get_value("Patient", patient.name, "custom_bandhu_id")
+
+		frappe.set_user(self.cad_user)
+		try:
+			search_patient(bandhu_id)
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertTrue(
+			frappe.db.exists(
+				"Access Log",
+				{
+					"user": self.cad_user,
+					"export_from": "Patient",
+					"method": "CAD Patient Search",
+					"filters": bandhu_id,
+				},
+			)
+		)
+
+	def test_patient_card_render_is_recorded_against_the_patient(self):
+		patient = self._make_patient("Test Audited Card Patient")
+
+		frappe.set_user(self.cad_user)
+		try:
+			get_patient_card_html(patient.name)
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertTrue(
+			frappe.db.exists(
+				"Access Log",
+				{
+					"user": self.cad_user,
+					"export_from": "Patient",
+					"method": "CAD Patient Card",
+					"reference_document": patient.name,
+				},
+			)
+		)
+
+	def test_a_blocked_card_render_leaves_no_access_log_row(self):
+		patient = self._make_patient("Test Unlogged Card Patient")
+
+		frappe.set_user(self.no_role_user)
+		try:
+			self.assertRaises(frappe.PermissionError, get_patient_card_html, patient.name)
+		finally:
+			frappe.set_user("Administrator")
+
+		self.assertFalse(frappe.db.exists("Access Log", {"reference_document": patient.name}))

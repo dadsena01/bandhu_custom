@@ -6,9 +6,19 @@ from frappe.utils import validate_email_address, validate_phone_number
 
 PROVISIONABLE_ROLES = ["Doctor", "Nurse", "Clinic Assistant cum Driver"]
 
-# The Gender master ships seven records from Frappe. Field staff records are collected on
-# paper forms that offer three, and the CAD patient form already offers the same three.
+# Gender only ships pre-seeded via the setup wizard, which a `bench new-site` +
+# `install-app` site never runs — seed_default_genders() covers that.
 OFFERED_GENDERS = ["Male", "Female", "Other"]
+
+
+def seed_default_genders() -> None:
+	existing = set(frappe.get_all("Gender", pluck="name"))
+
+	for gender in OFFERED_GENDERS:
+		if gender in existing:
+			continue
+
+		frappe.get_doc({"doctype": "Gender", "gender": gender}).insert(ignore_permissions=True)
 
 
 def require_system_manager() -> None:
@@ -29,7 +39,7 @@ def get_form_options() -> dict:
 	return {"roles": PROVISIONABLE_ROLES, "genders": genders}
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def provision_staff_member(
 	first_name: str,
 	last_name: str | None,

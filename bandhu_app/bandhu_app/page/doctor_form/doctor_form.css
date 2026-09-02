@@ -2,7 +2,7 @@
 	--max-w: var(--page-max-width, 1000px);
 	max-width: var(--max-w);
 	margin: 0 auto;
-	padding: 0 var(--padding-md);
+	padding: 0 var(--padding-md) var(--padding-2xl);
 }
 
 .doctor-dash .empty-state {
@@ -17,13 +17,15 @@
 }
 
 .doctor-dash .empty-state .empty-state-icon {
-	font-size: 32px;
+	width: 32px;
+	height: 32px;
 	margin-bottom: 10px;
 	opacity: 0.4;
 }
 
 .doctor-dash .empty-state .empty-state-icon.small {
-	font-size: 24px;
+	width: 24px;
+	height: 24px;
 	margin-bottom: 8px;
 }
 
@@ -74,46 +76,123 @@
 	white-space: nowrap;
 }
 
-.doctor-dash .table-wrap {
-	overflow: auto;
-	border: 1px solid var(--table-border-color);
-	border-radius: var(--border-radius-md);
+/* Cards stretch to their row's height so two side by side start and end together -- a rail
+   with three buttons next to a rail with one otherwise left a visible step between them. */
+.doctor-dash .patient-cards {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+	gap: var(--margin-sm);
 	margin-top: var(--margin-sm);
 }
 
-.doctor-dash .table {
-	margin-bottom: 0;
-	min-width: 560px;
+.doctor-dash .patient-card {
+	display: grid;
+	grid-template-columns: 1fr 180px;
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius-md);
+	background: var(--fg-color);
+	/* The rail's dropdown escapes the card, so this cannot clip. */
+	overflow: visible;
 }
 
-.doctor-dash .table thead {
-	position: sticky;
-	top: 0;
-	z-index: 1;
+.doctor-dash .patient-card[data-tone="ready"] {
+	--queue-tone: var(--green-500);
 }
 
-.doctor-dash .table th {
+.doctor-dash .patient-card[data-tone="review"] {
+	--queue-tone: var(--blue-500);
+}
+
+.doctor-dash .patient-card[data-tone="waiting"] {
+	--queue-tone: var(--orange-400);
+}
+
+.doctor-dash .patient-card[data-tone="done"] {
+	--queue-tone: var(--gray-300);
+}
+
+.doctor-dash .patient-card-status {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--padding-sm);
+	padding: var(--padding-sm) var(--padding-md) 0;
+}
+
+.doctor-dash .status-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-size: var(--text-xs);
+	font-weight: var(--weight-semibold);
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+	white-space: nowrap;
+	color: var(--text-color);
+}
+
+.doctor-dash .status-dot {
+	width: 7px;
+	height: 7px;
+	border-radius: var(--border-radius-full);
+	background: var(--queue-tone);
+}
+
+/* The visit count is context, not a call to act, so it reads as a quiet tag next to a loud pill. */
+.doctor-dash .visit-tag {
+	font-size: var(--text-xs);
+	color: var(--text-light);
+	white-space: nowrap;
+}
+
+.doctor-dash .visit-tag.repeat {
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+	color: var(--text-color);
+	cursor: pointer;
+}
+
+.doctor-dash .patient-card-body {
+	padding: 2px var(--padding-md) var(--padding-md);
+	cursor: pointer;
+	flex: 1;
+}
+
+.doctor-dash .patient-card-body:hover {
 	background: var(--subtle-fg);
-	padding: 8px 12px;
-	font-size: var(--text-sm);
+}
+
+.doctor-dash .patient-card-head {
+	display: flex;
+	align-items: baseline;
+	flex-wrap: wrap;
+	gap: var(--padding-sm);
+}
+
+.doctor-dash .patient-card .patient-name {
+	font-size: var(--text-base);
 	font-weight: var(--weight-semibold);
 	color: var(--heading-color);
-	white-space: nowrap;
-	border-bottom: 1px solid var(--table-border-color);
 }
 
-.doctor-dash .table td {
-	padding: 10px 12px;
-	vertical-align: middle;
-	border-bottom: 1px solid var(--table-border-color);
+.doctor-dash .patient-card .patient-meta {
+	font-size: var(--text-sm);
+	color: var(--text-muted);
 }
 
-.doctor-dash .table tbody tr:last-child td {
-	border-bottom: none;
+.doctor-dash .patient-card .patient-clinical {
+	margin-top: 4px;
+	font-size: var(--text-sm);
+	color: var(--text-muted);
 }
 
-.doctor-queue-row {
-	cursor: pointer;
+.doctor-dash .patient-card .patient-clinical .pending {
+	color: var(--yellow-600);
+}
+
+.doctor-dash .patient-card .patient-clinical .muted {
+	color: var(--text-light);
 }
 
 .doctor-dash .queue-head {
@@ -151,12 +230,10 @@
 	color: var(--border-color);
 }
 
-.doctor-dash .session-bar .session-dot {
-	font-size: 8px;
-}
-
-.doctor-dash .session-bar .session-dot.running {
-	color: var(--green-500);
+/* Desk's own .icon ships `margin: 0 auto`; in this flex row those auto margins swallow the
+   free space and fling each icon away from the label it belongs to. */
+.doctor-dash .session-bar .icon {
+	margin: 0;
 }
 
 .doctor-dash .welcome {
@@ -170,36 +247,9 @@
 	margin: 0;
 }
 
-.history-badge {
-	display: inline-flex;
-	align-items: center;
-	gap: 4px;
-	padding: 2px 8px;
-	border-radius: var(--border-radius-full);
-	font-size: var(--text-xs);
-	font-weight: var(--weight-medium);
-	white-space: nowrap;
-	cursor: default;
-}
-
-.history-badge.clickable {
-	cursor: pointer;
-}
-
-.history-badge.first-visit {
-	background: var(--bg-green);
-	color: var(--text-on-green);
-}
-
-.history-badge.repeat {
-	background: var(--subtle-fg);
-	color: var(--text-color);
-}
-
 .history-expand-indicator {
 	display: inline-flex;
-	margin-left: 2px;
-	font-size: 10px;
+	margin-left: 3px;
 	color: inherit;
 	opacity: 0.5;
 	transition: transform 0.15s;
@@ -245,47 +295,67 @@
 	text-decoration: underline;
 }
 
-.history-cell {
-	vertical-align: top;
-	min-width: 140px;
+.doctor-dash .patient-card-actions {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: var(--padding-xs);
+	padding: var(--padding-sm) var(--padding-md);
+	border-left: 1px solid var(--border-color);
+	background: var(--bg-color);
 }
 
-.clinical-cell {
-	vertical-align: top;
-	min-width: 160px;
-	font-size: var(--text-xs);
+/* The clinical actions sit in the middle of the rail and Details stays on the floor, so the
+   two rails in a row line up whatever each patient's state allows. */
+.doctor-dash .rail-primary {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: var(--padding-xs);
+	margin-block: auto;
+}
+
+.doctor-dash .rail-primary .doctor-action-btn {
+	width: 100%;
+}
+
+.doctor-dash .rail-note {
+	font-size: var(--text-sm);
+	color: var(--text-light);
+	text-align: center;
+	padding: var(--padding-xs) 0;
+}
+
+.doctor-dash .rail-secondary {
+	display: flex;
+	align-items: center;
+	gap: var(--padding-xs);
+}
+
+/* Details and the overflow are always there, so they stay quiet next to the clinical actions. */
+.doctor-dash .rail-secondary .rail-details {
+	flex: 1;
+	background: transparent;
 	color: var(--text-muted);
 }
 
-.clinical-cell .pending {
-	color: var(--yellow-600);
+.doctor-dash .rail-secondary .rail-details:hover {
+	background: var(--subtle-fg);
+	color: var(--text-color);
 }
 
-.doctor-action-btns {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 6px;
+.doctor-dash .rail-more-btn {
+	padding: 0 8px;
 }
+
+.doctor-dash .rail-more .dropdown-menu {
+	min-width: 160px;
+}
+
 
 .doctor-action-btn {
 	white-space: nowrap;
-}
-
-.detail-row {
-	display: flex;
-	justify-content: space-between;
-	gap: 12px;
-	padding: 4px 0;
-	border-bottom: 1px solid var(--border-color);
-	font-size: var(--text-sm);
-}
-
-.detail-row span:first-child {
-	color: var(--text-muted);
-}
-
-.detail-heading {
-	margin-top: 16px;
+	min-height: 32px;
 }
 
 @media (max-width: 768px) {
@@ -293,12 +363,110 @@
 		padding: 0 var(--padding-sm);
 	}
 
-	.doctor-dash .table {
-		min-width: 400px;
+	.doctor-dash .patient-cards,
+	.doctor-dash .patient-card {
+		grid-template-columns: 1fr;
 	}
 
-	.doctor-dash .table td,
-	.doctor-dash .table th {
-		padding: 8px 10px;
+	.doctor-dash .patient-card-actions {
+		border-left: none;
+		border-top: 1px solid var(--border-color);
 	}
+
+	.doctor-dash .patient-card-actions .doctor-action-btn {
+		min-height: 40px;
+	}
+}
+
+.doctor-dash .table-wrap {
+	overflow: auto;
+	border: 1px solid var(--table-border-color);
+	border-radius: var(--border-radius-md);
+	margin-top: var(--margin-sm);
+}
+
+/* Frappe's own templates/styles/standard.css sets `.table { margin: 20px 0 }`, which shows as
+   an empty strip inside .table-wrap's border, above the header row. */
+.doctor-dash .table {
+	margin: 0;
+	min-width: 560px;
+}
+
+.doctor-dash .table th {
+	background: var(--subtle-fg);
+	padding: 8px 12px;
+	font-size: var(--text-sm);
+	font-weight: var(--weight-semibold);
+	color: var(--heading-color);
+	white-space: nowrap;
+	border-bottom: 1px solid var(--table-border-color);
+}
+
+.doctor-dash .table td {
+	padding: 10px 12px;
+	vertical-align: middle;
+	border-bottom: 1px solid var(--table-border-color);
+}
+
+.doctor-dash .table tbody tr:last-child td {
+	border-bottom: none;
+}
+
+.doctor-dash .completed-row {
+	cursor: pointer;
+}
+
+.doctor-dash .completed-row:hover {
+	background: var(--subtle-fg);
+}
+
+.doctor-dash .completed-clinic-id {
+	white-space: nowrap;
+	color: var(--text-muted);
+}
+
+.doctor-dash .completed-summary {
+	font-size: var(--text-sm);
+	color: var(--text-muted);
+}
+
+.doctor-dash .completed-summary .pending {
+	color: var(--yellow-600);
+}
+
+.doctor-dash .completed-summary .muted {
+	color: var(--text-light);
+}
+
+.doctor-dash .completed-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: var(--padding-xs);
+	white-space: nowrap;
+}
+
+.bandhu-load-error {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--margin-md);
+	max-width: var(--page-max-width, 1000px);
+	margin: var(--margin-md) auto;
+	padding: var(--padding-2xl) var(--padding-md);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius-md);
+	background: var(--bg-color);
+	color: var(--text-muted);
+	text-align: center;
+}
+
+.bandhu-load-error .load-error-icon {
+	width: 32px;
+	height: 32px;
+	opacity: 0.4;
+}
+
+.bandhu-load-error .load-error-retry {
+	min-height: 44px;
+	padding: 0 var(--padding-lg);
 }

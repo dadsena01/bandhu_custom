@@ -1,28 +1,96 @@
 .my-schedule {
 	--max-w: var(--page-max-width, 760px);
+	--rail: 20px;
+	--rail-line: 6px;
+	--dot: 11px;
 	max-width: var(--max-w);
 	margin: 0 auto;
-	padding: 0 var(--padding-md) var(--padding-xl);
+	padding: 0 var(--padding-md) var(--padding-2xl);
+}
+
+/* The rail is drawn per item rather than as one line down the container so it starts at the first
+   bullet and stops at the last, instead of trailing into the month gap above and the page below. */
+.my-schedule .sched-item,
+.my-schedule .month-head {
+	position: relative;
+	padding-left: var(--rail);
+}
+
+.my-schedule .sched-item::before,
+.my-schedule .month-head:not(:first-child)::before {
+	content: "";
+	position: absolute;
+	left: var(--rail-line);
+	top: 0;
+	bottom: 0;
+	width: 2px;
+	background: var(--border-color);
+}
+
+/* Each segment has to reach across the gap to the next one, or the rail reads as dashes — the
+   month heading's own margins are the widest of those gaps. */
+.my-schedule .sched-item::before {
+	bottom: calc(-1 * var(--margin-sm));
+}
+
+.my-schedule .month-head:not(:first-child)::before {
+	top: calc(-1 * var(--margin-xl));
+	bottom: calc(-1 * var(--margin-sm));
+}
+
+/* Nothing precedes the very first bullet, so a segment above it reads as a severed line. */
+.my-schedule .month-head:first-child + .sched-item::before {
+	top: calc(var(--padding-md) + 5px + var(--dot) / 2);
+}
+
+.my-schedule .sched-item:last-child::before {
+	bottom: auto;
+	height: calc(var(--padding-md) + 5px + var(--dot) / 2);
+}
+
+.my-schedule .sched-item::after {
+	content: "";
+	position: absolute;
+	left: var(--rail-line);
+	top: calc(var(--padding-md) + 5px);
+	width: var(--dot);
+	height: var(--dot);
+	margin-left: calc(1px - var(--dot) / 2);
+	border-radius: var(--border-radius-full);
+	border: 2px solid var(--border-color);
+	background: var(--bg-color);
+}
+
+.my-schedule .sched-item.is-today::after {
+	border-color: var(--green-500);
+	background: var(--green-500);
+}
+
+.my-schedule .sched-item.is-cancelled::after {
+	border-color: var(--red-500);
+	background: var(--bg-color);
 }
 
 .my-schedule .month-head {
-	font-size: var(--text-sm);
-	font-weight: var(--weight-semibold);
-	color: var(--text-muted);
-	text-transform: uppercase;
-	letter-spacing: 0.4px;
-	margin: var(--margin-lg) 0 var(--margin-sm);
+	font-size: var(--text-md);
+	font-weight: var(--weight-bold);
+	color: var(--heading-color);
+	margin: var(--margin-xl) 0 var(--margin-sm);
 }
 
+/* The first heading has nothing to separate itself from, so the same gap reads as a hole. */
 .my-schedule .month-head:first-child {
-	margin-top: 0;
+	margin-top: var(--margin-sm);
+}
+
+.my-schedule .sched-item {
+	margin-bottom: var(--margin-sm);
 }
 
 .my-schedule .sched-card {
 	border: 1px solid var(--border-color);
 	border-radius: var(--border-radius-md);
 	background: var(--bg-color);
-	margin-bottom: var(--margin-sm);
 	overflow: hidden;
 }
 
@@ -82,7 +150,9 @@
 
 .my-schedule .sched-caret {
 	color: var(--text-muted);
-	font-size: 12px;
+	width: 14px;
+	height: 14px;
+	flex: none;
 	margin-top: 4px;
 	transition: transform 0.15s;
 }
@@ -119,13 +189,59 @@
 	color: var(--text-muted);
 }
 
-.my-schedule .detail-head {
+.my-schedule .detail-place {
+	margin-bottom: var(--margin-md);
+}
+
+/* The destination is the answer the row is opened for; everything else is qualification. */
+.my-schedule .detail-site {
+	font-size: var(--text-base);
+	font-weight: var(--weight-semibold);
+	color: var(--heading-color);
+}
+
+/* Muted against the heading it marks: the pin says "destination", the name is the answer. */
+.my-schedule .detail-site-icon {
+	color: var(--text-muted);
+	margin-right: 6px;
+	vertical-align: -3px;
+}
+
+.my-schedule .detail-where {
+	font-size: var(--text-sm);
+	color: var(--text-muted);
+}
+
+.my-schedule .detail-aside {
+	margin-top: 6px;
 	font-size: var(--text-xs);
+	color: var(--text-muted);
+}
+
+.my-schedule .detail-group + .detail-group {
+	margin-top: var(--margin-md);
+}
+
+.my-schedule .detail-head {
+	font-size: var(--text-sm);
 	font-weight: var(--weight-semibold);
 	color: var(--text-muted);
-	text-transform: uppercase;
-	letter-spacing: 0.4px;
-	margin: var(--margin-md) 0 2px;
+	margin: 0 0 2px;
+}
+
+/* A tel: link is the point of listing the team, so it keeps a thumb-sized tap area through
+   vertical padding — but no chrome: on the card's own tinted panel a white pill reads as a
+   second, competing surface rather than as a link. */
+.my-schedule .detail-call {
+	display: inline-block;
+	padding: 3px 0;
+	color: var(--text-color);
+	white-space: nowrap;
+}
+
+.my-schedule .detail-call-icon {
+	margin-right: 5px;
+	vertical-align: -1px;
 }
 
 .my-schedule .sched-badge {
@@ -147,6 +263,11 @@
 	color: var(--text-on-red);
 }
 
+.my-schedule .sched-badge-icon {
+	margin-right: 4px;
+	vertical-align: -2px;
+}
+
 .my-schedule .empty-state {
 	display: flex;
 	flex-direction: column;
@@ -160,7 +281,8 @@
 }
 
 .my-schedule .empty-state .empty-state-icon {
-	font-size: 32px;
+	width: 32px;
+	height: 32px;
 	margin-bottom: 10px;
 	opacity: 0.4;
 }
@@ -183,8 +305,40 @@
 		min-width: 100%;
 	}
 
+	.my-schedule {
+		--rail: 16px;
+		--rail-line: 5px;
+		--dot: 9px;
+	}
+
 	.my-schedule .sched-meta {
 		text-align: left;
 		white-space: normal;
 	}
+}
+
+.bandhu-load-error {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--margin-md);
+	max-width: var(--page-max-width, 1000px);
+	margin: var(--margin-md) auto;
+	padding: var(--padding-2xl) var(--padding-md);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius-md);
+	background: var(--bg-color);
+	color: var(--text-muted);
+	text-align: center;
+}
+
+.bandhu-load-error .load-error-icon {
+	width: 32px;
+	height: 32px;
+	opacity: 0.4;
+}
+
+.bandhu-load-error .load-error-retry {
+	min-height: 44px;
+	padding: 0 var(--padding-lg);
 }

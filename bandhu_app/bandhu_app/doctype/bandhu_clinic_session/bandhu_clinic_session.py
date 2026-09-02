@@ -50,7 +50,7 @@ class BandhuClinicSession(Document):
 			practitioner = self.get(fieldname)
 			if not practitioner:
 				continue
-			actual_role = frappe.db.get_value("Healthcare Practitioner", practitioner, "custom_role")
+			actual_role = frappe.get_cached_value("Healthcare Practitioner", practitioner, "custom_role")
 			if actual_role != required_role:
 				frappe.throw(
 					_("{0} must be a Healthcare Practitioner with role {1}, but {2} has role {3}.").format(

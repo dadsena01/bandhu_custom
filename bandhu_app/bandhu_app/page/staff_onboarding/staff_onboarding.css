@@ -2,7 +2,7 @@
 	--max-w: var(--page-max-width, 700px);
 	max-width: var(--max-w);
 	margin: 0 auto;
-	padding: 0 var(--padding-md);
+	padding: 0 var(--padding-md) var(--padding-2xl);
 }
 
 .staff-onboarding-dash .onboarding-form {
@@ -51,4 +51,30 @@
 	.staff-onboarding-dash .onboarding-grid {
 		grid-template-columns: 1fr;
 	}
+}
+
+.bandhu-load-error {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--margin-md);
+	max-width: var(--page-max-width, 1000px);
+	margin: var(--margin-md) auto;
+	padding: var(--padding-2xl) var(--padding-md);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius-md);
+	background: var(--bg-color);
+	color: var(--text-muted);
+	text-align: center;
+}
+
+.bandhu-load-error .load-error-icon {
+	width: 32px;
+	height: 32px;
+	opacity: 0.4;
+}
+
+.bandhu-load-error .load-error-retry {
+	min-height: 44px;
+	padding: 0 var(--padding-lg);
 }

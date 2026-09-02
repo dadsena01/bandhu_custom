@@ -24,22 +24,25 @@ def compact_age(dob) -> str:
 	return f"{(reference - dob).days}d"
 
 
-def attach_compact_age(encounters: list) -> list:
-	"""Overwrite each row's `patient_age` with the display form, in one query for the batch."""
+def attach_patient_display_fields(encounters: list) -> list:
+	"""Overwrite each row's `patient_age` with the display form and carry the Clinic ID down,
+	in one query for the whole batch."""
 	patients = {encounter.patient for encounter in encounters if encounter.get("patient")}
 	if not patients:
 		return encounters
 
-	dob_by_patient = dict(
-		frappe.get_all(
+	patient_details = {
+		row.name: row
+		for row in frappe.get_all(
 			"Patient",
 			filters={"name": ["in", list(patients)]},
-			fields=["name", "dob"],
-			as_list=True,
+			fields=["name", "dob", "custom_bandhu_id"],
 		)
-	)
+	}
 	for encounter in encounters:
-		encounter.patient_age = compact_age(dob_by_patient.get(encounter.patient))
+		details = patient_details.get(encounter.patient) or {}
+		encounter.patient_age = compact_age(details.get("dob"))
+		encounter.clinic_id = details.get("custom_bandhu_id") or ""
 
 	return encounters
 

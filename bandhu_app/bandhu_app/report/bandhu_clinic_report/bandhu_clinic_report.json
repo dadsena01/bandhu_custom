@@ -20,6 +20,12 @@
  "roles": [
   {
    "role": "System Manager"
+  },
+  {
+   "role": "Director"
+  },
+  {
+   "role": "Programme Manager"
   }
  ]
 }

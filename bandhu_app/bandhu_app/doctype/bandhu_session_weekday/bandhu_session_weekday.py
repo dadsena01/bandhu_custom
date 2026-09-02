@@ -16,9 +16,7 @@ class BandhuSessionWeekday(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
-		weekday: DF.Literal[
-			"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
-		]
+		weekday: DF.Literal["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 	# end: auto-generated types
 
 	pass

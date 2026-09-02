@@ -1,7 +1,7 @@
 {
- "app": "frappe",
+ "app": "bandhu_app",
  "charts": [],
- "content": "[{\"id\": \"svhROOO8hc\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h2\\\">Admin</span>\", \"col\": 12}}, {\"id\": \"QkFF9Vyji-\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"sCadForm01\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"CAD Front Desk\", \"col\": 4}}, {\"id\": \"sDoctorForm01\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Doctor\", \"col\": 4}}, {\"id\": \"sNurseForm01\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Nurse\", \"col\": 4}}, {\"id\": \"LiLCpOur0c\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"SDKV6BOECu\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Project\", \"col\": 6}}, {\"id\": \"PAZ1P-VDyt\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Unit\", \"col\": 6}}, {\"id\": \"dUbpCwsq0E\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"BfzzI8JO2J\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"R_-WXPPbX_\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Site \", \"col\": 6}}, {\"id\": \"1YeGxof0ys\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Location\", \"col\": 6}}, {\"id\": \"nsBUEoltBC\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"lXwNUrynE0\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"c5FIOPo6Yv\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Healthcare Practitioner\", \"col\": 6}}, {\"id\": \"RiCNs6Lujd\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Vehicle\", \"col\": 6}}, {\"id\": \"V00RD2h7C9\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"F22d4OkkgK\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"VPcNKsK5e_\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Users\", \"col\": 6}}, {\"id\": \"E8MXtzx7mB\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Roles\", \"col\": 6}}, {\"id\": \"6lUDMNJGee\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"sNewSchedule01\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"New Schedule\", \"col\": 6}}, {\"id\": \"sClinicSched01\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Clinic Schedules\", \"col\": 6}}, {\"id\": \"spNewSched01\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"sOnbStaff01\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Onboard Staff\", \"col\": 12}}, {\"id\": \"92332ba909\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"4fe2bd9e34\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"d704ca04f1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Sessions Running Now\", \"col\": 12}}]",
+ "content": "[{\"id\": \"svhROOO8hc\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h2\\\">Admin</span>\", \"col\": 12}}, {\"id\": \"QkFF9Vyji-\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"sCadForm01\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"CAD Front Desk\", \"col\": 4}}, {\"id\": \"sDoctorForm01\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Doctor\", \"col\": 4}}, {\"id\": \"sNurseForm01\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Nurse\", \"col\": 4}}, {\"id\": \"LiLCpOur0c\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"SDKV6BOECu\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Project\", \"col\": 6}}, {\"id\": \"PAZ1P-VDyt\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Unit\", \"col\": 6}}, {\"id\": \"dUbpCwsq0E\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"BfzzI8JO2J\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"R_-WXPPbX_\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Site\", \"col\": 6}}, {\"id\": \"1YeGxof0ys\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Location\", \"col\": 6}}, {\"id\": \"nsBUEoltBC\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"lXwNUrynE0\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"c5FIOPo6Yv\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Healthcare Practitioner\", \"col\": 6}}, {\"id\": \"RiCNs6Lujd\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Vehicle\", \"col\": 6}}, {\"id\": \"V00RD2h7C9\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"F22d4OkkgK\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"VPcNKsK5e_\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Users\", \"col\": 6}}, {\"id\": \"E8MXtzx7mB\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Roles\", \"col\": 6}}, {\"id\": \"6lUDMNJGee\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"sNewSession01\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"New Session\", \"col\": 12}}, {\"id\": \"spNewSession01\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"sNewSchedule01\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"New Schedule\", \"col\": 6}}, {\"id\": \"sClinicSched01\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Clinic Schedules\", \"col\": 6}}, {\"id\": \"spNewSched01\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"sOnbStaff01\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Onboard Staff\", \"col\": 12}}, {\"id\": \"92332ba909\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"4fe2bd9e34\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"d704ca04f1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Sessions Running Now\", \"col\": 12}}]",
  "creation": "2026-04-16 23:27:02.949058",
  "custom_blocks": [],
  "docstatus": 0,
@@ -97,13 +97,13 @@
    "doc_view": "List",
    "label": "Roles",
    "link_to": "Role",
-   "stats_filter": "[[\"Role\",\"role_name\",\"in\",[\"Doctor\",\"Nurse\",\"Helpline Staff\",\"Clinic Assistant cum Driver\"]]]",
+   "stats_filter": "[[\"Role\",\"role_name\",\"in\",[\"Doctor\",\"Nurse\",\"Clinic Assistant cum Driver\"]]]",
    "type": "DocType"
   },
   {
    "color": "Grey",
    "doc_view": "List",
-   "label": "Site ",
+   "label": "Site",
    "link_to": "Site",
    "stats_filter": "[]",
    "type": "DocType"
@@ -128,6 +128,13 @@
    "doc_view": "",
    "label": "Onboard Staff",
    "link_to": "staff-onboarding",
+   "type": "Page"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "",
+   "label": "New Session",
+   "link_to": "new-session",
    "type": "Page"
   },
   {

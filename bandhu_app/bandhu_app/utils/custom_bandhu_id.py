@@ -25,7 +25,9 @@ def make_clinic_id(location: str | None, unit: str | None) -> str:
 	lsg_code = (
 		frappe.db.get_value("Bandhu Location", location, "lsg_numeric_code") if location else None
 	) or UNKNOWN_LSG_CODE
-	unit_code = (frappe.db.get_value("Unit", unit, "unit_numeric_code") if unit else None) or UNKNOWN_UNIT_CODE
+	unit_code = (
+		frappe.db.get_value("Unit", unit, "unit_numeric_code") if unit else None
+	) or UNKNOWN_UNIT_CODE
 
 	year = now_datetime().strftime("%y")
 
@@ -40,9 +42,9 @@ def next_serial(year: str) -> str:
 
 	if int(serial) > SERIAL_CEILING:
 		frappe.throw(
-			_("Clinic ID serial numbers for {0} are exhausted; the format cannot represent more than {1} patients in one year.").format(
-				year, SERIAL_CEILING
-			)
+			_(
+				"Clinic ID serial numbers for {0} are exhausted; the format cannot represent more than {1} patients in one year."
+			).format(year, SERIAL_CEILING)
 		)
 
 	return serial

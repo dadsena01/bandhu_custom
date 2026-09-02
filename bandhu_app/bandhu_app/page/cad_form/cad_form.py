@@ -2,8 +2,10 @@ import re
 
 import frappe
 from frappe import _
-from frappe.utils import flt, validate_phone_number
+from frappe.core.doctype.access_log.access_log import make_access_log
+from frappe.utils import flt, getdate, validate_phone_number
 
+from bandhu_app.bandhu_app.utils.patient_encounter import TERMINAL_WORKFLOW_STATES
 from bandhu_app.bandhu_app.utils.session import find_active_session
 
 
@@ -63,18 +65,33 @@ def get_session_status() -> dict:
 	}
 
 
+# India and Nepal are the two source countries CMID actually registers patients from; the
+# form shows them as fixed quick-tap tabs rather than reading them from the Country master,
+# which holds all 250 countries and has no "is common" flag of its own.
+QUICK_COUNTRIES = ["India", "Nepal"]
+
+
 @frappe.whitelist()
 def get_form_options() -> dict:
 	require_cad_access()
-	states = frappe.get_all(
-		"State",
-		fields=["name", "is_major_state"],
-		order_by="is_major_state desc, name asc",
+	major_states = frappe.get_all(
+		"State", filters={"is_major_state": 1}, fields=["name"], order_by="name asc", pluck="name"
 	)
-	sectors = frappe.get_all("Sectors", fields=["name"], order_by="name asc")
+	other_states = frappe.get_all(
+		"State", filters={"is_major_state": 0}, fields=["name"], order_by="name asc", pluck="name"
+	)
+	major_sectors = frappe.get_all(
+		"Sectors", filters={"is_major_sector": 1}, fields=["name"], order_by="name asc", pluck="name"
+	)
+	other_countries = frappe.get_all(
+		"Country", filters={"name": ["not in", QUICK_COUNTRIES]}, order_by="name asc", pluck="name"
+	)
 	return {
-		"states": [s.name for s in states],
-		"sectors": [s.name for s in sectors],
+		"major_states": major_states,
+		"other_states": other_states,
+		"major_sectors": major_sectors,
+		"quick_countries": QUICK_COUNTRIES,
+		"other_countries": other_countries,
 	}
 
 
@@ -87,7 +104,7 @@ def search_patient(query: str) -> list:
 		return []
 
 	like = f"%{query}%"
-	return frappe.get_all(
+	results = frappe.get_all(
 		"Patient",
 		or_filters=[
 			["custom_bandhu_id", "like", like],
@@ -99,6 +116,15 @@ def search_patient(query: str) -> list:
 		fields=["name", "patient_name", "custom_bandhu_id", "sex", "dob"],
 		limit=20,
 	)
+
+	# The search reads the whole patient master by design (a CAD legitimately meets patients
+	# registered at another site), so the term is recorded rather than the search being narrowed.
+	# This is one row per deliberate search, not per keystroke — cad_form.js fires it on Enter or
+	# the search button only (cad_form.js:322-327) — and make_access_log defers the insert, so it
+	# costs the request nothing.
+	make_access_log(doctype="Patient", method="CAD Patient Search", filters=query)
+
+	return results
 
 
 PATIENT_CARD_PRINT_FORMAT = "Bandhu Patient Card"
@@ -123,6 +149,10 @@ def get_patient_card_html(patient: str) -> str:
 	# Rendering a print format checks the Patient print permission, which this role does not
 	# hold. The flag is Frappe's own way to render on behalf of a caller that has already
 	# been authorised by other means, as require_cad_access() has done above.
+	# The card names one patient and carries their PII to a printer, so who rendered which card
+	# is the access worth keeping — the reference document makes it answerable per patient.
+	make_access_log(doctype="Patient", document=patient, method="CAD Patient Card")
+
 	frappe.flags.ignore_print_permissions = True
 	try:
 		return frappe.get_print(
@@ -167,18 +197,24 @@ def resolve_registration_origin(session: str) -> tuple[str | None, str | None]:
 	return location, unit
 
 
-@frappe.whitelist()
+MAX_PLAUSIBLE_AGE = 120
+
+
+@frappe.whitelist(methods=["POST"])
 def register_patient(
 	full_name: str,
-	dob: str,
 	sex: str,
+	dob: str | None = None,
+	age: float | None = None,
 	session: str | None = None,
 	mobile: str | None = None,
 	height_cm: float | None = None,
 	weight_kg: float | None = None,
+	native_country: str | None = None,
 	native_state: str | None = None,
 	native_district: str | None = None,
 	occupation: str | None = None,
+	specify_sector: str | None = None,
 	company_name: str | None = None,
 	abha_id: str | None = None,
 ) -> str:
@@ -197,10 +233,20 @@ def register_patient(
 
 	if not full_name:
 		frappe.throw(_("Full name is required."))
-	if not dob:
-		frappe.throw(_("Date of birth is required."))
 	if not sex:
 		frappe.throw(_("Sex is required."))
+
+	if not dob:
+		# Field registration often can't get an exact birth date out of a migrant worker who
+		# knows their age but not their birthday. Jan 1 of the birth year marks the DOB as an
+		# estimate rather than today's month/day, which would read as a real recorded birthday
+		# it isn't. An explicit DOB always wins over a derived one.
+		if age is None:
+			frappe.throw(_("Date of birth or age is required."))
+		if flt(age) < 0 or flt(age) > MAX_PLAUSIBLE_AGE:
+			frappe.throw(_("Age must be between 0 and {0}.").format(MAX_PLAUSIBLE_AGE))
+		birth_year = getdate().year - int(flt(age))
+		dob = f"{birth_year}-01-01"
 
 	if height_cm is not None and flt(height_cm) < 0:
 		frappe.throw(_("Height cannot be negative."))
@@ -228,9 +274,11 @@ def register_patient(
 		"sex": sex,
 		"dob": dob,
 		"mobile": mobile,
+		"custom_native_country": native_country or None,
 		"custom_native_state": native_state or None,
 		"custom_native_district": native_district or None,
 		"custom_sector_of_employment": occupation or None,
+		"custom_specify_employment_sector": specify_sector or None,
 		"custom_name_of_company": company_name or None,
 		"custom_abha_id": abha_id or None,
 	}
@@ -245,7 +293,7 @@ def register_patient(
 	return patient.name
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_encounter(patient: str, session: str) -> str:
 	require_session_access(session)
 
@@ -263,7 +311,7 @@ def create_encounter(patient: str, session: str) -> str:
 		{
 			"patient": patient,
 			"custom_clinic_session": session,
-			"custom_workflow_state": ["!=", "Completed"],
+			"custom_workflow_state": ["not in", list(TERMINAL_WORKFLOW_STATES)],
 		},
 		"name",
 	)
@@ -297,7 +345,7 @@ def get_today_queue(session: str) -> list:
 	rows = frappe.get_all(
 		"Patient Queue",
 		filters={"clinic_session": session},
-		fields=["name", "patient", "current_stage", "status"],
+		fields=["name", "patient", "encounter", "current_stage", "status"],
 		order_by="creation asc",
 	)
 	if not rows:
@@ -314,6 +362,7 @@ def get_today_queue(session: str) -> list:
 	return [
 		{
 			"patient": row.patient,
+			"encounter": row.encounter,
 			"patient_name": patient_by_name.get(row.patient, {}).get("patient_name", ""),
 			"clinic_id": patient_by_name.get(row.patient, {}).get("custom_bandhu_id", ""),
 			"current_stage": row.current_stage,
@@ -321,3 +370,20 @@ def get_today_queue(session: str) -> list:
 		}
 		for row in rows
 	]
+
+
+@frappe.whitelist(methods=["POST"])
+def cancel_visit(encounter: str, session: str) -> None:
+	"""End a visit the patient walked out of, so it leaves the doctor and nurse boards."""
+	require_session_access(session)
+	require_running_session(session)
+
+	encounter_doc = frappe.get_doc("Patient Encounter", encounter)
+	if encounter_doc.custom_clinic_session != session:
+		frappe.throw(_("This encounter does not belong to the current clinic session."))
+
+	if encounter_doc.custom_workflow_state in TERMINAL_WORKFLOW_STATES:
+		frappe.throw(_("This visit has already ended."))
+
+	encounter_doc.custom_workflow_state = "Cancelled"
+	encounter_doc.save(ignore_permissions=True)

@@ -1,5 +1,5 @@
 {
- "app": "frappe",
+ "app": "bandhu_app",
  "charts": [],
  "content": "[{\"id\":\"l8QBwz8Yly\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h2\\\">Referrals</span>\",\"col\":12}},{\"id\":\"k9_2mzWVSE\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"5mBt08xurb\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Referral\",\"col\":12}}]",
  "creation": "2026-04-20 18:14:16.321815",
