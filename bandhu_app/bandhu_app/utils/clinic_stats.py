@@ -23,7 +23,7 @@ def count_encounters(session_names: list) -> dict:
 			frappe.qb.from_(encounter)
 			.select(
 				encounter.custom_clinic_session.as_("session"),
-				# One patient seen twice in a camp is one patient, not two.
+				# One patient seen twice in a session is one patient, not two.
 				Count(encounter.patient).distinct().as_("patients"),
 				Sum(completed).as_("completed"),
 			)
@@ -37,10 +37,10 @@ def count_encounters(session_names: list) -> dict:
 
 
 def count_new_patients(session_names: list) -> dict:
-	"""A patient is new when this camp holds their first encounter anywhere in the system.
+	"""A patient is new when this session holds their first encounter anywhere in the system.
 
 	First is decided on the clinical date, never on row-insert order: January's paper
-	records back-entered in June must still make January the first visit and June's camp
+	records back-entered in June must still make January the first visit and June's session
 	the repeat one.
 	"""
 	if not session_names:
@@ -83,7 +83,7 @@ def find_session_patients(session_names: list) -> set:
 
 
 def find_first_encounter_sessions(patients: set) -> dict:
-	"""The camp holding each patient's earliest encounter, over their whole history.
+	"""The session holding each patient's earliest encounter, over their whole history.
 
 	Ranking in Python rather than SQL keeps this two flat queries instead of the
 	per-row correlated subquery it used to be.

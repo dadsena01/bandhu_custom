@@ -108,7 +108,7 @@
 	grid-template-columns: 1fr;
 }
 
-/* A grid item's automatic minimum size is its content's min-content width, and the camp table
+/* A grid item's automatic minimum size is its content's min-content width, and the session table
    carries min-width: 480px — without this the column refuses to shrink on a phone and the whole
    page scrolls sideways instead of the table scrolling inside its own wrapper. */
 .sched-wizard .panels > * {
@@ -335,7 +335,7 @@
 	min-width: 480px;
 }
 
-/* The Check step lists every camp the pattern produces, so the table is capped against the
+/* The Check step lists every session the pattern produces, so the table is capped against the
    viewport and scrolls inside itself, leaving the Back/Create buttons reachable. */
 .sched-wizard .table-wrap-tall {
 	max-height: 60vh;
@@ -441,7 +441,7 @@
 	}
 
 	/* 34px is fine under a mouse; a finger needs more, and a mis-tap here silently schedules
-	   the wrong camps. */
+	   the wrong sessions. */
 	.sched-wizard .day-chip {
 		width: 38px;
 		height: 38px;

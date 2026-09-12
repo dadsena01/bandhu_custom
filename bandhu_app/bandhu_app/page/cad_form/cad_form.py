@@ -151,9 +151,9 @@ def get_patient_card_html(patient: str) -> str:
 
 
 def require_running_session(session_name: str) -> dict:
-	# Registration is gated on the camp's status, not just the caller's role: the session
+	# Registration is gated on the session's status, not just the caller's role: the session
 	# resolves the LSG and unit codes baked into the patient's permanent Clinic ID, and a
-	# cancelled or not-yet-started camp would stamp a location the patient was never seen at.
+	# cancelled or not-yet-started session would stamp a location the patient was never seen at.
 	session_doc = frappe.db.get_value(
 		"Bandhu Clinic Session",
 		session_name,
@@ -178,7 +178,7 @@ def resolve_registration_origin(session: str) -> tuple[str | None, str | None]:
 	"""The LSG and unit whose numeric codes get baked into the patient's Clinic ID.
 
 	Both are required here. make_clinic_id falls back to a reserved "unknown" code so a patient
-	registered with no session context still gets a well-formed ID, but a camp always has a
+	registered with no session context still gets a well-formed ID, but a session always has a
 	site and a unit -- if either has no numeric code that is an unfilled master, and letting it
 	through stamps "unknown location" into an identifier that is permanent and already printed
 	on the patient's card by the time anyone notices.
@@ -189,7 +189,7 @@ def resolve_registration_origin(session: str) -> tuple[str | None, str | None]:
 	if not location:
 		frappe.throw(
 			_(
-				"This camp's site has no LSG set, so a Clinic ID cannot be issued. Ask an administrator to set it."
+				"This session's site has no LSG set, so a Clinic ID cannot be issued. Ask an administrator to set it."
 			)
 		)
 	if not frappe.db.get_value("Bandhu Location", location, "lsg_numeric_code"):
@@ -200,7 +200,9 @@ def resolve_registration_origin(session: str) -> tuple[str | None, str | None]:
 		)
 	if not unit:
 		frappe.throw(
-			_("This camp has no unit set, so a Clinic ID cannot be issued. Ask an administrator to set it.")
+			_(
+				"This session has no unit set, so a Clinic ID cannot be issued. Ask an administrator to set it."
+			)
 		)
 	if not frappe.db.get_value("Unit", unit, "unit_numeric_code"):
 		frappe.throw(
@@ -427,8 +429,8 @@ def get_today_queue(session: str) -> list:
 	require_session_access(session)
 
 	# Read the encounters, not Patient Queue. That table holds one row per patient, overwritten
-	# on every visit, so as soon as a patient attends a later camp their row moves with them and
-	# this camp quietly loses them. The encounter is the visit.
+	# on every visit, so as soon as a patient attends a later session their row moves with them and
+	# this session quietly loses them. The encounter is the visit.
 	rows = frappe.get_all(
 		"Patient Encounter",
 		filters={"custom_clinic_session": session, "docstatus": ["<", 2]},

@@ -301,7 +301,7 @@ function summarySentence() {
 			: "") +
 		(team.length ? ". " + __("Team") + ": " + frappe.utils.escape_html(team.join(", ")) : "") +
 		". " +
-		__("{0} camps will be created now.", [preview.total || 0])
+		__("{0} sessions will be created now.", [preview.total || 0])
 	);
 }
 
@@ -319,7 +319,9 @@ function renderNextFourWeeks() {
 	const dates = preview.next_4_weeks || [];
 
 	if (!dates.length) {
-		return '<div class="preview-empty">' + __("No camps fall in the next 4 weeks.") + "</div>";
+		return (
+			'<div class="preview-empty">' + __("No sessions fall in the next 4 weeks.") + "</div>"
+		);
 	}
 
 	const site = labelFor(options.sites, schedule.site);
@@ -638,7 +640,7 @@ async function createSchedule(page) {
 	if (!result) return;
 
 	frappe.show_alert({
-		message: __("Schedule created. {0} camp(s) are being added in the background.", [
+		message: __("Schedule created. {0} session(s) are being added in the background.", [
 			result.scheduled,
 		]),
 		indicator: "green",

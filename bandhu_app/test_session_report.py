@@ -162,7 +162,7 @@ class IntegrationTestSessionReport(IntegrationTestCase):
 		self.assertEqual(row["medicines_prescribed"], 2)
 		self.assertEqual(row["medicines_dispensed"], 1)
 
-	def test_date_filter_excludes_camps_outside_the_period(self):
+	def test_date_filter_excludes_sessions_outside_the_period(self):
 		inside = self._make_session(today())
 		outside = self._make_session(add_days(today(), 30))
 

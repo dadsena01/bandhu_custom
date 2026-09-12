@@ -3,7 +3,7 @@ import frappe
 
 def execute():
 	"""`site_name` is a new fetch field, and fetch_from only fires on save — every existing
-	camp would keep showing the raw `SITE-0002` id as its title until someone edited it."""
+	session would keep showing the raw `SITE-0002` id as its title until someone edited it."""
 	sessions = frappe.get_all(
 		"Bandhu Clinic Session", filters={"site": ["is", "set"]}, fields=["name", "site"]
 	)

@@ -1,5 +1,5 @@
 {
- "chart_name": "Patients Per Camp",
+ "chart_name": "Patients Per Session",
  "chart_type": "Report",
  "creation": "2026-08-21 10:00:00.000000",
  "currency": "",
@@ -14,7 +14,7 @@
  "modified": "2026-08-21 10:00:00.000000",
  "modified_by": "Administrator",
  "module": "Bandhu App",
- "name": "Patients Per Camp",
+ "name": "Patients Per Session",
  "number_of_groups": 0,
  "owner": "Administrator",
  "parent_document_type": "",

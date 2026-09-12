@@ -8,7 +8,7 @@ path a browser's `frappe.call` actually takes: whitelist check, HTTP-method chec
 coercion against the type annotations, then the in-function role gate. Calling the Python
 function directly — what the rest of the suite does — hands the code arguments that are
 already the right type and skips all four, and that is exactly how the blank-number-input
-crash of 2026-08-10 reached a live camp.
+crash of 2026-08-10 reached a live session.
 """
 
 from contextlib import contextmanager
@@ -73,8 +73,8 @@ class TestApiBoundary(IntegrationTestCase):
 		cls.gender = frappe.get_all("Gender", limit=1, pluck="name")[0]
 
 	def setUp(self):
-		# Rollback is per class, so every test builds its own camp and asserts against that
-		# camp only. Sharing one would make each test read the previous test's rows.
+		# Rollback is per class, so every test builds its own session and asserts against that
+		# session only. Sharing one would make each test read the previous test's rows.
 		self.suffix = frappe.generate_hash(length=8)
 		self.driver = self.make_practitioner("Clinic Assistant cum Driver")
 		self.doctor = self.make_practitioner("Doctor")
@@ -254,7 +254,7 @@ class TestApiBoundary(IntegrationTestCase):
 
 		The registration origin is asserted alongside, so a signature whose parameter names
 		drift away from the wire keys fails here instead of silently registering the patient
-		with no camp behind them.
+		with no session behind them.
 		"""
 		frappe.set_user(self.cad_user)
 		patient = call_over_http(
@@ -287,9 +287,9 @@ class TestApiBoundary(IntegrationTestCase):
 
 	# --- role and session gates, reached the way the browser reaches them ---------------
 
-	def test_the_cad_session_gate_fires_over_http_for_another_drivers_camp(self):
+	def test_the_cad_session_gate_fires_over_http_for_another_drivers_session(self):
 		other_driver = self.make_practitioner("Clinic Assistant cum Driver")
-		other_camp = (
+		other_session = (
 			frappe.get_doc(
 				{
 					"doctype": "Bandhu Clinic Session",
@@ -309,11 +309,11 @@ class TestApiBoundary(IntegrationTestCase):
 
 		frappe.set_user(self.cad_user)
 		with self.assertRaises(frappe.PermissionError):
-			call_over_http(f"{CAD}.register_patient", **self.register_args(session=other_camp))
+			call_over_http(f"{CAD}.register_patient", **self.register_args(session=other_session))
 
 		self.assertEqual(self.patients_registered_here(), 0)
 
-	def test_registration_over_http_is_refused_for_a_cancelled_camp(self):
+	def test_registration_over_http_is_refused_for_a_cancelled_session(self):
 		cancelled = self.make_session(status="Cancelled")
 		frappe.set_user(self.cad_user)
 		with self.assertRaises(frappe.ValidationError):
@@ -321,7 +321,7 @@ class TestApiBoundary(IntegrationTestCase):
 
 		self.assertEqual(self.patients_registered_here(), 0)
 
-	def test_a_closed_camp_cannot_be_reopened_over_http(self):
+	def test_a_closed_session_cannot_be_reopened_over_http(self):
 		closed = self.make_session(status="Completed")
 		frappe.set_user(self.nurse_user)
 		with self.assertRaises(frappe.ValidationError):

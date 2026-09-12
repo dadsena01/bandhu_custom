@@ -9,8 +9,8 @@ from bandhu_app.bandhu_app.baseline_test_fixtures import ensure_baseline_fixture
 from bandhu_app.bandhu_app.page.nurse_form.nurse_form import (
 	dispense_medicine,
 	end_session,
-	get_camp_progress,
 	get_patient_registration_details,
+	get_session_progress,
 	record_vitals,
 	start_session,
 	submit_test_results,
@@ -258,14 +258,14 @@ class IntegrationTestNurseForm(IntegrationTestCase):
 		finally:
 			frappe.set_user("Administrator")
 
-	def test_camp_progress_counts_every_stage_not_just_the_nurse_queues(self):
+	def test_session_progress_counts_every_stage_not_just_the_nurse_queues(self):
 		self._make_encounter(self.session, "Waiting for Doctor")
 		self._make_encounter(self.session, "Awaiting Test", tests=[{"test_name": "Malaria"}])
 		self._make_encounter(self.session, "Completed")
 
 		frappe.set_user(self.nurse_user)
 		try:
-			progress = get_camp_progress(self.session)
+			progress = get_session_progress(self.session)
 		finally:
 			frappe.set_user("Administrator")
 
@@ -434,7 +434,7 @@ class IntegrationTestNurseForm(IntegrationTestCase):
 		).insert(ignore_permissions=True)
 		return doc.name
 
-	def test_closed_camp_cannot_be_reopened(self):
+	def test_closed_session_cannot_be_reopened(self):
 		session = self._make_session_with("Completed", today())
 
 		frappe.set_user(self.nurse_user)
@@ -446,7 +446,7 @@ class IntegrationTestNurseForm(IntegrationTestCase):
 
 		self.assertEqual(frappe.db.get_value("Bandhu Clinic Session", session, "status"), "Completed")
 
-	def test_camp_cannot_be_opened_on_another_day(self):
+	def test_session_cannot_be_opened_on_another_day(self):
 		session = self._make_session_with("Planned", add_days(today(), 7))
 
 		frappe.set_user(self.nurse_user)
@@ -458,7 +458,7 @@ class IntegrationTestNurseForm(IntegrationTestCase):
 
 		self.assertEqual(frappe.db.get_value("Bandhu Clinic Session", session, "status"), "Planned")
 
-	def test_cancelled_camp_cannot_be_opened_or_closed(self):
+	def test_cancelled_session_cannot_be_opened_or_closed(self):
 		session = self._make_session_with("Cancelled", today())
 
 		frappe.set_user(self.nurse_user)
@@ -470,7 +470,7 @@ class IntegrationTestNurseForm(IntegrationTestCase):
 
 		self.assertEqual(frappe.db.get_value("Bandhu Clinic Session", session, "status"), "Cancelled")
 
-	def test_camp_that_is_not_open_cannot_be_closed(self):
+	def test_session_that_is_not_open_cannot_be_closed(self):
 		session = self._make_session_with("Planned", today())
 
 		frappe.set_user(self.nurse_user)
@@ -482,7 +482,7 @@ class IntegrationTestNurseForm(IntegrationTestCase):
 
 		self.assertEqual(frappe.db.get_value("Bandhu Clinic Session", session, "status"), "Planned")
 
-	def test_todays_planned_camp_opens_and_closes(self):
+	def test_todays_planned_session_opens_and_closes(self):
 		session = self._make_session_with("Planned", today())
 
 		frappe.set_user(self.nurse_user)

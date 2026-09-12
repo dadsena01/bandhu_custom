@@ -33,7 +33,7 @@ def validate_filters(filters):
 	if getdate(filters.from_date) > getdate(filters.to_date):
 		frappe.throw(_("From Date cannot be after To Date."))
 
-	# Every camp in the period is fetched with its child-table counts, so an unbounded span is
+	# Every session in the period is fetched with its child-table counts, so an unbounded span is
 	# one request that grows without limit as the programme runs.
 	if date_diff(filters.to_date, filters.from_date) > MAX_REPORT_DAYS:
 		frappe.throw(_("Choose a period of {0} days or less.").format(MAX_REPORT_DAYS))
@@ -158,7 +158,7 @@ def hours_between(start, end) -> float:
 
 
 def build_chart(rows: list) -> dict:
-	"""One bar per day, not per camp — several camps share a date, and repeated
+	"""One bar per day, not per session — several sessions share a date, and repeated
 	x-labels get truncated to an unreadable stub once the bars are narrow."""
 	by_date = {}
 	for row in rows:
@@ -183,10 +183,10 @@ def build_chart(rows: list) -> dict:
 
 def build_summary(rows: list) -> list:
 	patients = sum(row["patients"] for row in rows)
-	camps_held = len([row for row in rows if row["status"] in ("In Progress", "Completed")])
+	sessions_held = len([row for row in rows if row["status"] in ("In Progress", "Completed")])
 
 	return [
-		{"label": _("Camps Held"), "value": camps_held, "datatype": "Int"},
+		{"label": _("Sessions Held"), "value": sessions_held, "datatype": "Int"},
 		{"label": _("Patients Seen"), "value": patients, "datatype": "Int"},
 		{
 			"label": _("New Patients"),
@@ -194,8 +194,8 @@ def build_summary(rows: list) -> list:
 			"datatype": "Int",
 		},
 		{
-			"label": _("Avg Patients per Camp"),
-			"value": flt(patients / camps_held, 1) if camps_held else 0,
+			"label": _("Avg Patients per Session"),
+			"value": flt(patients / sessions_held, 1) if sessions_held else 0,
 			"datatype": "Float",
 		},
 		{
@@ -211,7 +211,7 @@ def get_columns() -> list:
 		{"fieldname": "date", "label": _("Date"), "fieldtype": "Date", "width": 100},
 		{
 			"fieldname": "session",
-			"label": _("Camp"),
+			"label": _("Session"),
 			"fieldtype": "Link",
 			"options": "Bandhu Clinic Session",
 			"width": 150,

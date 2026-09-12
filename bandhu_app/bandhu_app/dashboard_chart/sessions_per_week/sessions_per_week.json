@@ -1,6 +1,6 @@
 {
  "based_on": "date",
- "chart_name": "Camps Per Week",
+ "chart_name": "Sessions Per Week",
  "chart_type": "Count",
  "creation": "2026-08-14 20:30:00.000000",
  "currency": "",
@@ -15,7 +15,7 @@
  "modified": "2026-08-14 20:30:00.000000",
  "modified_by": "Administrator",
  "module": "Bandhu App",
- "name": "Camps Per Week",
+ "name": "Sessions Per Week",
  "number_of_groups": 0,
  "owner": "Administrator",
  "parent_document_type": "",

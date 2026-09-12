@@ -11,7 +11,7 @@ frappe.provide("bandhu.session_ui");
 (function () {
 	// frappe.call REJECTS on network failure (frappe/public/js/frappe/request.js:32-41). Without
 	// this wrapper the rejection escapes unhandled and page.main is never written, leaving staff
-	// on a weak camp signal staring at a blank screen with no message and no way to retry.
+	// on a weak session signal staring at a blank screen with no message and no way to retry.
 	async function refresh_page(page, load) {
 		try {
 			await load(page);
@@ -22,8 +22,8 @@ frappe.provide("bandhu.session_ui");
 		}
 	}
 
-	// Server side, bandhu_app.bandhu_app.utils.realtime pushes this whenever a camp moves, into
-	// that camp's own document room. Each board answers it by re-reading its own queues.
+	// Server side, bandhu_app.bandhu_app.utils.realtime pushes this whenever a session moves, into
+	// that session's own document room. Each board answers it by re-reading its own queues.
 	const BOARD_UPDATE_EVENT = "bandhu_board_update";
 	const BOARD_UPDATE_DOCTYPE = "Bandhu Clinic Session";
 
@@ -48,9 +48,9 @@ frappe.provide("bandhu.session_ui");
 	// `refresh` is the page's own loader; `route` is its desk route. Desk keeps a page's DOM and
 	// module state alive after routing away, so a board nobody is looking at leaves the work to
 	// on_page_show instead of fetching for a hidden screen.
-	// The push goes to the camp's own document room, so a board has to join that room and leave
-	// it again when the camp changes. Called on every render, not once, for that reason.
-	function join_camp_room(route, session) {
+	// The push goes to the session's own document room, so a board has to join that room and leave
+	// it again when the session changes. Called on every render, not once, for that reason.
+	function join_session_room(route, session) {
 		if (subscribed_rooms.get(route) === session) return;
 
 		const previous = subscribed_rooms.get(route);
@@ -61,7 +61,7 @@ frappe.provide("bandhu.session_ui");
 	}
 
 	function subscribe_to_board_updates(route, current_session, refresh) {
-		join_camp_room(route, current_session());
+		join_session_room(route, current_session());
 
 		// This file loads through frappe.require, so a page can only subscribe once it is already
 		// rendering -- which is every time it is shown, not once at load.
@@ -136,7 +136,7 @@ frappe.provide("bandhu.session_ui");
 		);
 	}
 
-	// A camp that is over and a camp that is running have to be told apart across a phone screen
+	// A session that is over and a session that is running have to be told apart across a phone screen
 	// in daylight, so the status is a labelled badge rather than a coloured dot: colour alone is
 	// the one signal that fails both a colour-blind reader and a washed-out outdoor screen.
 	const SESSION_STATUS_BADGES = {
@@ -317,7 +317,7 @@ frappe.provide("bandhu.session_ui");
 	}
 
 	// An omitted theme is deliberate: .es-badge's own default is gray, and there is no
-	// [data-theme="gray"] rule to name, so a closed camp gets the neutral badge by leaving it off.
+	// [data-theme="gray"] rule to name, so a closed session gets the neutral badge by leaving it off.
 	function format_badge(label, theme, variant) {
 		return (
 			'<span class="es-badge"' +

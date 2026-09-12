@@ -287,7 +287,7 @@ def generate_scheduled_sessions():
 
 def report_stale_schedules(schedules: list) -> None:
 	"""A schedule whose watermark is still behind today after a run has generated nothing, and
-	the first sign of that is otherwise a team arriving at a camp that was never created."""
+	the first sign of that is otherwise a team arriving at a session that was never created."""
 	stale = (
 		[
 			row.name
@@ -319,7 +319,7 @@ CLASH_CHECK_DATES = 10
 
 
 def find_assignment_clashes(schedule, dates: list) -> list:
-	"""Staff or a vehicle already committed to another camp on one of these dates.
+	"""Staff or a vehicle already committed to another session on one of these dates.
 	Reported, never blocked — a genuine double-booking is sometimes intentional."""
 	if not dates:
 		return []
@@ -428,7 +428,7 @@ def preview_occurrences(schedule: str) -> list:
 
 def remove_unused_future_sessions(schedule: str) -> list:
 	"""Drop the schedule's future sessions that nobody has used yet, so the current pattern
-	can rebuild them. A camp carrying clinical data is never destroyed."""
+	can rebuild them. A session carrying clinical data is never destroyed."""
 	candidates = frappe.get_all(
 		"Bandhu Clinic Session",
 		filters={"session_schedule": schedule, "status": "Planned", "date": [">", today()]},

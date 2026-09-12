@@ -20,7 +20,7 @@ function allergyHistoryOf(encounter) {
 	return (encountersByName[encounter] || {}).custom_allergy_history || "";
 }
 
-// One call for the whole queue. Fetching per patient meant a 40-patient camp fired 40 parallel
+// One call for the whole queue. Fetching per patient meant a 40-patient session fired 40 parallel
 // requests, saturating the browser connection pool on a weak link.
 async function getPatientHistories(patients) {
 	if (!patients.length) return {};
@@ -485,7 +485,7 @@ async function submitDoctorAction(page, method, args, alertMessage = __("Saved")
 }
 
 // Where a patient sits when they are not with the doctor. The doctor's own two queues rank
-// first; the nurse's queue is shown so the doctor can see the whole camp, but not acted on.
+// first; the nurse's queue is shown so the doctor can see the whole session, but not acted on.
 const WAITING_ORDER = {
 	"Awaiting Doctor Review": 0,
 	"Waiting for Doctor": 1,
@@ -717,7 +717,7 @@ function renderHistoryList(encounter) {
 	return '<ul class="history-list">' + items + "</ul>";
 }
 
-// Only shown once a camp is big enough for scrolling to be the problem it solves.
+// Only shown once a session is big enough for scrolling to be the problem it solves.
 const FILTER_BAR_MIN_PATIENTS = 8;
 
 function renderFilterBar(patientCount) {
@@ -1029,8 +1029,8 @@ async function refreshDashboard() {
 	await frappe.require(SESSION_UI_ASSET);
 	bandhu.session_ui.add_refresh_icon(doctorPage, refreshDashboard);
 	await bandhu.session_ui.refresh_page(doctorPage, loadDashboard);
-	// After the load, not before: the camp's room can only be joined once the page knows which
-	// camp it is showing.
+	// After the load, not before: the session's room can only be joined once the page knows which
+	// session it is showing.
 	bandhu.session_ui.subscribe_to_board_updates(
 		"doctor-form",
 		() => (doctorSession ? doctorSession.session_name : null),

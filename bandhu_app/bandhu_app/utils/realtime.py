@@ -1,6 +1,6 @@
 import frappe
 
-# Sent to the camp's own document room, so it reaches the people working that camp rather than
+# Sent to the session's own document room, so it reaches the people working that session rather than
 # every System User on the site. Each board answers it by re-reading its own queues.
 BOARD_UPDATE_EVENT = "bandhu_board_update"
 

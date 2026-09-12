@@ -161,7 +161,7 @@ class IntegrationTestTestsReport(IntegrationTestCase):
 		rows = self._run(test_name="Malaria")
 		self.assertEqual([row["test_name"] for row in rows], ["Malaria"])
 
-	def test_camps_outside_the_period_are_excluded(self):
+	def test_sessions_outside_the_period_are_excluded(self):
 		self._make_encounter(self._make_session(add_days(today(), -10)), [{"test_name": "Hb"}])
 
 		self.assertEqual(self._run(), [])

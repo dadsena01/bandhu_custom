@@ -2,19 +2,19 @@
  "app": "bandhu_app",
  "charts": [
   {
-   "chart_name": "Camps Per Week",
-   "label": "Camps Per Week"
+   "chart_name": "Sessions Per Week",
+   "label": "Sessions Per Week"
   },
   {
-   "chart_name": "Patients Per Camp",
-   "label": "Patients Per Camp"
+   "chart_name": "Patients Per Session",
+   "label": "Patients Per Session"
   },
   {
    "chart_name": "Patients By Clinic",
    "label": "Patients By Clinic"
   }
  ],
- "content": "[{\"id\": \"dashHeadToday\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Today</b></span>\", \"col\": 12}}, {\"id\": \"dashCard0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Camps Running Now\", \"col\": 4}}, {\"id\": \"dashCard1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Camps Planned Today\", \"col\": 4}}, {\"id\": \"dashCard2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Camps Late To Open\", \"col\": 4}}, {\"id\": \"dashCard3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Camps Left Open\", \"col\": 4}}, {\"id\": \"dashCard5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Camps Cancelled This Month\", \"col\": 4}}, {\"id\": \"dashSpacer1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"dashHeadCamps\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Camps</b></span>\", \"col\": 12}}, {\"id\": \"dashQuickList1\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Camps: Next 7 Days\", \"col\": 12}}, {\"id\": \"dashChart1\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Camps Per Week\", \"col\": 12}}, {\"id\": \"patients_per_camp_chart\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Patients Per Camp\", \"col\": 12}}, {\"id\": \"patients_by_clinic_chart\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Patients By Clinic\", \"col\": 12}}, {\"id\": \"dashSpacer2\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"dashHeadActions\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"dashShortcut1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"New Schedule\", \"col\": 4}}, {\"id\": \"dashShortcut2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Clinic Schedules\", \"col\": 4}}, {\"id\": \"dashShortcut3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"All Camps\", \"col\": 4}}, {\"id\": \"bandhuSessionRpt\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Session Report\", \"col\": 4}}, {\"id\": \"bandhuTestsRpt\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Tests Report\", \"col\": 4}}, {\"id\": \"bandhuClinicRpt\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Clinic Report\", \"col\": 4}}]",
+ "content": "[{\"id\": \"dashHeadToday\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Today</b></span>\", \"col\": 12}}, {\"id\": \"dashCard0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Sessions Running Now\", \"col\": 4}}, {\"id\": \"dashCard1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Sessions Planned Today\", \"col\": 4}}, {\"id\": \"dashCard2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Sessions Late To Open\", \"col\": 4}}, {\"id\": \"dashCard3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Sessions Left Open\", \"col\": 4}}, {\"id\": \"dashCard5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Sessions Cancelled This Month\", \"col\": 4}}, {\"id\": \"dashSpacer1\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"dashHeadSessions\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Sessions</b></span>\", \"col\": 12}}, {\"id\": \"dashQuickList1\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Sessions: Next 7 Days\", \"col\": 12}}, {\"id\": \"dashChart1\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Sessions Per Week\", \"col\": 12}}, {\"id\": \"patients_per_session_chart\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Patients Per Session\", \"col\": 12}}, {\"id\": \"patients_by_clinic_chart\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Patients By Clinic\", \"col\": 12}}, {\"id\": \"dashSpacer2\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"dashHeadActions\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Actions</b></span>\", \"col\": 12}}, {\"id\": \"dashShortcut1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"New Schedule\", \"col\": 4}}, {\"id\": \"dashShortcut2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Clinic Schedules\", \"col\": 4}}, {\"id\": \"dashShortcut3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"All Sessions\", \"col\": 4}}, {\"id\": \"bandhuSessionRpt\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Session Report\", \"col\": 4}}, {\"id\": \"bandhuTestsRpt\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Tests Report\", \"col\": 4}}, {\"id\": \"bandhuClinicRpt\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Clinic Report\", \"col\": 4}}]",
  "creation": "2026-04-22 12:43:44.056608",
  "custom_blocks": [],
  "docstatus": 0,
@@ -34,24 +34,24 @@
  "name": "Dashboard",
  "number_cards": [
   {
-   "label": "Camps Running Now",
-   "number_card_name": "Camps Running Now"
+   "label": "Sessions Running Now",
+   "number_card_name": "Sessions Running Now"
   },
   {
-   "label": "Camps Planned Today",
-   "number_card_name": "Camps Planned Today"
+   "label": "Sessions Planned Today",
+   "number_card_name": "Sessions Planned Today"
   },
   {
-   "label": "Camps Late To Open",
-   "number_card_name": "Camps Late To Open"
+   "label": "Sessions Late To Open",
+   "number_card_name": "Sessions Late To Open"
   },
   {
-   "label": "Camps Left Open",
-   "number_card_name": "Camps Left Open"
+   "label": "Sessions Left Open",
+   "number_card_name": "Sessions Left Open"
   },
   {
-   "label": "Camps Cancelled This Month",
-   "number_card_name": "Camps Cancelled This Month"
+   "label": "Sessions Cancelled This Month",
+   "number_card_name": "Sessions Cancelled This Month"
   }
  ],
  "owner": "Administrator",
@@ -60,7 +60,7 @@
  "quick_lists": [
   {
    "document_type": "Bandhu Clinic Session",
-   "label": "Camps: Next 7 Days",
+   "label": "Sessions: Next 7 Days",
    "quick_list_filter": "[[\"Bandhu Clinic Session\",\"date\",\"between\",[frappe.datetime.get_today(),frappe.datetime.add_days(frappe.datetime.get_today(),7)]]]"
   }
  ],
@@ -92,7 +92,7 @@
   },
   {
    "doc_view": "List",
-   "label": "All Camps",
+   "label": "All Sessions",
    "link_to": "Bandhu Clinic Session",
    "type": "DocType"
   },

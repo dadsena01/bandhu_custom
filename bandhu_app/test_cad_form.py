@@ -449,7 +449,7 @@ class IntegrationTestCadForm(IntegrationTestCase):
 		try:
 			with self.assertRaises(frappe.ValidationError):
 				register_patient(
-					full_name="Cancelled Camp Patient",
+					full_name="Cancelled Session Patient",
 					dob="1990-01-01",
 					sex=self.gender,
 					session=cancelled_session,
@@ -457,7 +457,7 @@ class IntegrationTestCadForm(IntegrationTestCase):
 		finally:
 			frappe.set_user("Administrator")
 
-		self.assertFalse(frappe.db.exists("Patient", {"patient_name": "Cancelled Camp Patient"}))
+		self.assertFalse(frappe.db.exists("Patient", {"patient_name": "Cancelled Session Patient"}))
 
 	def test_register_patient_rejects_a_session_that_has_not_started(self):
 		planned_session = self._make_session(
@@ -468,7 +468,7 @@ class IntegrationTestCadForm(IntegrationTestCase):
 		try:
 			with self.assertRaises(frappe.ValidationError):
 				register_patient(
-					full_name="Planned Camp Patient",
+					full_name="Planned Session Patient",
 					dob="1990-01-01",
 					sex=self.gender,
 					session=planned_session,
@@ -476,7 +476,7 @@ class IntegrationTestCadForm(IntegrationTestCase):
 		finally:
 			frappe.set_user("Administrator")
 
-		self.assertFalse(frappe.db.exists("Patient", {"patient_name": "Planned Camp Patient"}))
+		self.assertFalse(frappe.db.exists("Patient", {"patient_name": "Planned Session Patient"}))
 
 	def test_search_patient_rejects_a_query_too_short_to_narrow_anything(self):
 		frappe.set_user(self.cad_user)
@@ -598,7 +598,7 @@ class IntegrationTestCadForm(IntegrationTestCase):
 		row = next(row for row in rows if row["patient"] == patient.name)
 		self.assertTrue(row["queued_at"])
 
-	def test_registration_refuses_a_camp_whose_lsg_has_no_number(self):
+	def test_registration_refuses_a_session_whose_lsg_has_no_number(self):
 		"""The unknown-LSG fallback exists for a patient registered with no session at all. Letting
 		it through here stamps "unknown location" into a permanent ID already printed on a card."""
 		location = frappe.db.get_value("Site", self.site, "location")
@@ -641,21 +641,21 @@ class IntegrationTestCadForm(IntegrationTestCase):
 		finally:
 			frappe.set_user("Administrator")
 
-	def test_today_queue_keeps_a_camp_after_the_patient_attends_a_later_one(self):
+	def test_today_queue_keeps_a_session_after_the_patient_attends_a_later_one(self):
 		"""Patient Queue holds one row per patient, overwritten every visit, so reading it made a
-		finished camp lose any patient who came back to a later one."""
-		patient = self._make_patient("Test Two Camp Patient")
+		finished session lose any patient who came back to a later one."""
+		patient = self._make_patient("Test Two Session Patient")
 		later_session = self._make_session(self.cad_practitioner, self.doctor_practitioner)
 
 		frappe.set_user(self.cad_user)
 		try:
 			create_encounter(patient.name, self.session)
 			create_encounter(patient.name, later_session)
-			first_camp = get_today_queue(self.session)
+			first_session = get_today_queue(self.session)
 		finally:
 			frappe.set_user("Administrator")
 
-		self.assertIn(patient.name, [row["patient"] for row in first_camp])
+		self.assertIn(patient.name, [row["patient"] for row in first_session])
 
 	def test_unprivileged_user_is_blocked(self):
 		patient = self._make_patient("Test Blocked Patient")

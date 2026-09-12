@@ -42,7 +42,7 @@ class PatientQueue(Document):
 		Registered with Frappe's Log Settings through `default_log_clearing_doctypes` in
 		hooks.py rather than through a scheduled job of our own.
 		"""
-		# ponytail: only finished rows are cleared, so a camp a nurse never closed leaves its
+		# ponytail: only finished rows are cleared, so a session a nurse never closed leaves its
 		# Active rows on the board forever — clear those too once session close is enforced (F5).
 		queue = frappe.qb.DocType("Patient Queue")
 		frappe.db.delete(

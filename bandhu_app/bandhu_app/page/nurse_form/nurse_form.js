@@ -124,7 +124,7 @@ async function loadQueues(page) {
 				args: { session_name: sessionName },
 			}),
 			frappe.call({
-				method: "bandhu_app.bandhu_app.page.nurse_form.nurse_form.get_camp_progress",
+				method: "bandhu_app.bandhu_app.page.nurse_form.nurse_form.get_session_progress",
 				args: { session_name: sessionName },
 			}),
 		]);
@@ -147,7 +147,7 @@ async function loadQueues(page) {
 		'<div class="nurse-dash">' +
 			bandhu.session_ui.format_welcome() +
 			bandhu.session_ui.format_session_info(nurseSession) +
-			renderCampProgress(progress) +
+			renderSessionProgress(progress) +
 			renderEndSessionButton() +
 			renderQueueSection(__("Patients for Tests"), testRows, "test") +
 			renderQueueSection(__("Patients for Medicines"), medicineRows, "medicine") +
@@ -192,9 +192,9 @@ function dispatchNurseAction(page, encounter, action) {
 	}
 }
 
-// Both nurse queues are empty for most of a camp -- the patients are with the front desk or the
+// Both nurse queues are empty for most of a session -- the patients are with the front desk or the
 // doctor -- and the page said nothing about any of them.
-function renderCampProgress(progress) {
+function renderSessionProgress(progress) {
 	const stages = [
 		[__("with doctor"), (progress.registered || 0) + (progress.with_doctor || 0)],
 		[__("for tests"), progress.for_tests || 0],
@@ -203,11 +203,11 @@ function renderCampProgress(progress) {
 	];
 
 	return (
-		'<div class="camp-progress">' +
+		'<div class="session-progress">' +
 		stages
 			.map(
 				([label, count]) =>
-					'<span class="camp-progress-item"><b>' +
+					'<span class="session-progress-item"><b>' +
 					count +
 					"</b> " +
 					frappe.utils.escape_html(label) +
@@ -535,9 +535,9 @@ function renderQueueOrder(encounter, action) {
 }
 
 // Time since the patient registered, not since the doctor sent them: no state change is
-// timestamped, so this is the honest number -- and who has been in the camp longest is what
+// timestamped, so this is the honest number -- and who has been in the session longest is what
 // the nurse needs anyway.
-function renderTimeInCamp(encounter) {
+function renderTimeInSession(encounter) {
 	if (!encounter.creation) return "";
 
 	// The column heading already says what this is, so the cell is just the duration.
@@ -577,7 +577,7 @@ function renderQueueSection(title, encounters, action) {
 				frappe.utils.escape_html(encounter.patient_sex || "") +
 				"</td>" +
 				(action
-					? '<td class="waited-cell">' + renderTimeInCamp(encounter) + "</td>"
+					? '<td class="waited-cell">' + renderTimeInSession(encounter) + "</td>"
 					: "") +
 				'<td class="action-cell">' +
 				renderQueueActionButtons(encounter, action) +
@@ -604,7 +604,7 @@ function renderQueueSection(title, encounters, action) {
 		"<th>" +
 		__("Sex") +
 		"</th>" +
-		(action ? "<th>" + __("In camp") + "</th>" : "") +
+		(action ? "<th>" + __("In session") + "</th>" : "") +
 		"<th>" +
 		__("Actions") +
 		"</th>" +
@@ -636,8 +636,8 @@ async function refreshDashboard() {
 	await frappe.require(SESSION_UI_ASSET);
 	bandhu.session_ui.add_refresh_icon(nursePage, refreshDashboard);
 	await bandhu.session_ui.refresh_page(nursePage, loadDashboard);
-	// After the load, not before: the camp's room can only be joined once the page knows which
-	// camp it is showing.
+	// After the load, not before: the session's room can only be joined once the page knows which
+	// session it is showing.
 	bandhu.session_ui.subscribe_to_board_updates(
 		"nurse-form",
 		() => (nurseSession ? nurseSession.session_name : null),

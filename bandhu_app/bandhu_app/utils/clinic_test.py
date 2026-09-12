@@ -1,6 +1,6 @@
 import frappe
 
-# The five tests CMID's camps have always run. They ship as data so the clinic can add a
+# The five tests CMID's sessions have always run. They ship as data so the clinic can add a
 # sixth without a deploy; these are only the out-of-the-box seed, not a source of truth.
 DEFAULT_TESTS = (
 	{"test_name": "Malaria", "result_shape": "Positive / Negative", "display_order": 10},

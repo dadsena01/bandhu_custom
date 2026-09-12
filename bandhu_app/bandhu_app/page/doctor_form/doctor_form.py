@@ -190,8 +190,8 @@ def get_patient_history(patient: str):
 def get_patient_histories(patients: list | str) -> dict:
 	"""Return the encounter history for a whole queue in one call.
 
-	The page used to ask per patient, so a 40-patient camp fired 40 parallel requests and
-	saturated the browser's connection pool on the weak links these camps run on.
+	The page used to ask per patient, so a 40-patient session fired 40 parallel requests and
+	saturated the browser's connection pool on the weak links these sessions run on.
 	"""
 	require_doctor_access()
 	patients = frappe.parse_json(patients)

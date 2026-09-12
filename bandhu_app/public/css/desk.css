@@ -96,9 +96,9 @@ body:is(
 }
 
 /* Frappe's Quick List hardcodes `prettyDate(doc.modified)` under every row
-   (frappe/public/js/frappe/widgets/quick_list_widget.js:149), so "Camps: Next 7 Days" printed
-   "3 days ago" against a camp planned for next week -- when the record was last edited, read as
-   when the camp is. The filter picks the right camps; only that line lies, and it is not
+   (frappe/public/js/frappe/widgets/quick_list_widget.js:149), so "Sessions: Next 7 Days" printed
+   "3 days ago" against a session planned for next week -- when the record was last edited, read as
+   when the session is. The filter picks the right sessions; only that line lies, and it is not
    configurable, so it goes. */
 body[data-route="Workspaces/Dashboard"] .quick-list-item .timestamp {
 	display: none;

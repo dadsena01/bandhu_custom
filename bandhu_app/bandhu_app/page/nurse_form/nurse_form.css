@@ -286,7 +286,7 @@
 	padding: 0 var(--padding-lg);
 }
 
-.nurse-dash .camp-progress {
+.nurse-dash .session-progress {
 	display: flex;
 	flex-wrap: wrap;
 	gap: var(--padding-md);
@@ -295,7 +295,7 @@
 	color: var(--text-muted);
 }
 
-.nurse-dash .camp-progress-item b {
+.nurse-dash .session-progress-item b {
 	color: var(--heading-color);
 	font-weight: var(--weight-semibold);
 	font-variant-numeric: tabular-nums;

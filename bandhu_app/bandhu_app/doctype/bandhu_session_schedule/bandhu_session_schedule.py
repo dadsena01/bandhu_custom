@@ -198,7 +198,7 @@ class BandhuSessionSchedule(Document):
 		)
 
 	def generate_sessions_on_save(self):
-		# Saving is when the user expects the camps to exist; making them wait for the
+		# Saving is when the user expects the sessions to exist; making them wait for the
 		# nightly job means an empty list and a support call.
 		from bandhu_app.bandhu_app.utils.session_schedule import (
 			enqueue_session_generation,
@@ -209,7 +209,7 @@ class BandhuSessionSchedule(Document):
 			return
 
 		enqueue_session_generation(self.name, regenerate=bool(self.flags.pattern_changed))
-		frappe.msgprint(_("Camps are being created in the background."), alert=True)
+		frappe.msgprint(_("Sessions are being created in the background."), alert=True)
 
 
 @frappe.whitelist(methods=["POST"])

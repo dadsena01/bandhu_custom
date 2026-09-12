@@ -174,7 +174,7 @@ async function renderFrontDesk(page, data) {
 		__("Stage") +
 		"</th>" +
 		"<th>" +
-		__("In camp") +
+		__("In session") +
 		"</th>" +
 		"<th></th>" +
 		"</tr></thead>" +
@@ -1063,8 +1063,8 @@ function renderQueueTable(page, rows) {
 				"<td>" +
 				format_stage_badge(row.current_stage) +
 				"</td>" +
-				'<td class="queue-in-camp">' +
-				format_time_in_camp(row) +
+				'<td class="queue-in-session">' +
+				format_time_in_session(row) +
 				"</td>" +
 				'<td class="queue-row-actions">' +
 				renderRowMenu(row) +
@@ -1109,8 +1109,8 @@ function renderRowMenu(row) {
 
 // Time since the patient registered, not time spent waiting: no state change is timestamped, and
 // a patient who is with the nurse is not waiting for anything. How long someone has been in the
-// camp is what the front desk is asked for anyway. Finished visits drop it.
-function format_time_in_camp(row) {
+// session is what the front desk is asked for anyway. Finished visits drop it.
+function format_time_in_session(row) {
 	if (!row.queued_at || QUEUE_TERMINAL_STAGES.has(row.current_stage)) return "";
 
 	// comment_when returns the framework's own <span class="frappe-timestamp">, so this string
@@ -1142,7 +1142,7 @@ function format_stage_badge(stage) {
 frappe.pages["cad-form"].on_page_load = function (wrapper) {
 	const page = frappe.ui.make_app_page({
 		parent: wrapper,
-		title: __("CAD Front Desk"),
+		title: __("CAD"),
 		single_column: true,
 	});
 
@@ -1163,8 +1163,8 @@ async function refreshBoard() {
 	bandhu.session_ui.add_refresh_icon(cadPage, refreshBoard);
 	const load = cadPage.main.find(".cad-queue-body").length ? loadQueue : loadDashboard;
 	await bandhu.session_ui.refresh_page(cadPage, load);
-	// After the load, not before: the camp's room can only be joined once the page knows which
-	// camp it is showing.
+	// After the load, not before: the session's room can only be joined once the page knows which
+	// session it is showing.
 	bandhu.session_ui.subscribe_to_board_updates(
 		"cad-form",
 		() => (cadSession ? cadSession.session_name : null),

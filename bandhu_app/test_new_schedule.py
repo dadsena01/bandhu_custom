@@ -94,12 +94,12 @@ class IntegrationTestNewSchedule(IntegrationTestCase):
 		self.assertEqual(result["dates"], [])
 		self.assertEqual(result["total"], 0)
 
-	def test_create_builds_every_camp_the_wizard_promised(self):
+	def test_create_builds_every_session_the_wizard_promised(self):
 		result = create_schedule(self.wizard_values())
 
 		self.assertTrue(frappe.db.exists("Bandhu Session Schedule", result["name"]))
 		self.assertTrue(result["scheduled"])
-		# `scheduled` is read off the pattern because the camps are built by a background job.
+		# `scheduled` is read off the pattern because the sessions are built by a background job.
 		# It still has to match what that job goes on to create.
 		self.assertEqual(
 			result["scheduled"],

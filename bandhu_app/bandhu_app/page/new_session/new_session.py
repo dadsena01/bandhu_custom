@@ -50,7 +50,7 @@ def get_form_options() -> dict:
 
 
 def last_used_defaults() -> dict:
-	"""Prefill from the most recently created session — the next ad hoc camp is usually run
+	"""Prefill from the most recently created session — the next ad hoc session is usually run
 	by the same team at the same time as the last one."""
 	recent = frappe.get_all(
 		"Bandhu Clinic Session",

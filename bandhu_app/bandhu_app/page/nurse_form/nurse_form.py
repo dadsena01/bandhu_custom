@@ -94,9 +94,9 @@ def get_upcoming_sessions() -> list:
 def load_session_for_status_change(session_name: str) -> dict:
 	require_session_access(session_name)
 	# for_update locks the row for the rest of this transaction, so a second request opening or
-	# closing the same camp waits here and then reads the committed status — without it both
+	# closing the same session waits here and then reads the committed status — without it both
 	# requests read Planned, both pass the guards below, and the second write silently replaces
-	# the first camp's start_time, which is what Session Report and "Camps Late To Open" read.
+	# the first session's start_time, which is what Session Report and "Sessions Late To Open" read.
 	session_doc = frappe.db.get_value(
 		"Bandhu Clinic Session",
 		session_name,
@@ -107,7 +107,7 @@ def load_session_for_status_change(session_name: str) -> dict:
 	if not session_doc:
 		frappe.throw(_("Clinic session not found."))
 	if session_doc.status == "Cancelled":
-		frappe.throw(_("This camp was cancelled. Do not travel to it."))
+		frappe.throw(_("This session was cancelled. Do not travel to it."))
 
 	return session_doc
 
@@ -117,16 +117,16 @@ def start_session(session_name: str) -> None:
 	session_doc = load_session_for_status_change(session_name)
 
 	if session_doc.status == "In Progress":
-		frappe.throw(_("This camp is already open."))
-	# Reopening a closed camp would let patients be registered against it hours or days
-	# later, with nothing in the record showing the camp had already been signed off.
+		frappe.throw(_("This session is already open."))
+	# Reopening a closed session would let patients be registered against it hours or days
+	# later, with nothing in the record showing the session had already been signed off.
 	if session_doc.status == "Completed":
 		frappe.throw(
-			_("This camp is already closed and cannot be reopened."),
+			_("This session is already closed and cannot be reopened."),
 		)
-	# A camp opened on the wrong date counts as running today on every board and dashboard.
+	# A session opened on the wrong date counts as running today on every board and dashboard.
 	if str(session_doc.date) != frappe.utils.today():
-		frappe.throw(_("You can only open a camp on the day it is scheduled."))
+		frappe.throw(_("You can only open a session on the day it is scheduled."))
 
 	frappe.db.set_value(
 		"Bandhu Clinic Session",
@@ -141,7 +141,7 @@ def end_session(session_name: str) -> None:
 	session_doc = load_session_for_status_change(session_name)
 
 	if session_doc.status != "In Progress":
-		frappe.throw(_("This camp is not open, so it cannot be closed."))
+		frappe.throw(_("This session is not open, so it cannot be closed."))
 
 	frappe.db.set_value(
 		"Bandhu Clinic Session",
@@ -170,8 +170,8 @@ def get_completed_patients(session_name: str) -> list:
 
 
 # The nurse only ever sees the two states that are hers, so between batches the page went blank
-# while a camp of forty was running around her. This is the shape of the camp in one line.
-CAMP_PROGRESS_STATES = {
+# while a session of forty was running around her. This is the shape of the session in one line.
+SESSION_PROGRESS_STATES = {
 	"registered": "Waiting for Doctor",
 	"with_doctor": "Awaiting Doctor Review",
 	"for_tests": "Awaiting Test",
@@ -181,7 +181,7 @@ CAMP_PROGRESS_STATES = {
 
 
 @frappe.whitelist()
-def get_camp_progress(session_name: str) -> dict:
+def get_session_progress(session_name: str) -> dict:
 	require_session_access(session_name)
 
 	# v16 refuses an aggregate written as a string in `fields`, so this goes through the query
@@ -195,7 +195,7 @@ def get_camp_progress(session_name: str) -> dict:
 	).run(as_dict=True)
 	by_state = {row.custom_workflow_state: row.total for row in counts}
 
-	return {key: by_state.get(state, 0) for key, state in CAMP_PROGRESS_STATES.items()}
+	return {key: by_state.get(state, 0) for key, state in SESSION_PROGRESS_STATES.items()}
 
 
 @frappe.whitelist()

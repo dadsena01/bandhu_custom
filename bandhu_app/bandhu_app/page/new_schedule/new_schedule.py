@@ -104,8 +104,8 @@ def create_schedule(values: str) -> dict:
 	draft.flags.clashes_already_shown = True
 	draft.insert()
 
-	# The camps themselves are built by a background job, so counting rows here would report
+	# The sessions themselves are built by a background job, so counting rows here would report
 	# zero. The pattern is what the wizard can promise: a new schedule owns none of its dates
-	# yet, so every occurrence in the horizon becomes a camp.
+	# yet, so every occurrence in the horizon becomes a session.
 	scheduled = occurrence_dates(draft, today(), add_days(today(), horizon_days()))
 	return {"name": draft.name, "scheduled": len(scheduled)}

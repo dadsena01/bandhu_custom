@@ -112,7 +112,7 @@ class IntegrationTestClinicReport(IntegrationTestCase):
 		filters.setdefault("site", self.site)
 		return execute(filters)[1]
 
-	def test_several_camps_collapse_into_one_row_per_clinic(self):
+	def test_several_sessions_collapse_into_one_row_per_clinic(self):
 		for _unused in range(2):
 			session = self._make_session()
 			self._make_encounter(session)
@@ -121,7 +121,7 @@ class IntegrationTestClinicReport(IntegrationTestCase):
 		rows = self._run()
 		self.assertEqual(len(rows), 1)
 		self.assertEqual(rows[0]["group"], self.clinic)
-		self.assertEqual(rows[0]["camps_held"], 2)
+		self.assertEqual(rows[0]["sessions_held"], 2)
 		self.assertEqual(rows[0]["patients"], 4)
 
 	def test_grouping_by_lsg_uses_the_sites_location(self):
@@ -130,23 +130,23 @@ class IntegrationTestClinicReport(IntegrationTestCase):
 		rows = self._run(group_by="LSG")
 		self.assertEqual(rows[0]["group"], self.location.lsg)
 
-	def test_planned_and_cancelled_camps_are_not_counted_as_held(self):
+	def test_planned_and_cancelled_sessions_are_not_counted_as_held(self):
 		self._make_session()
 		self._make_session(status="Planned")
 		self._make_session(status="Cancelled")
 
 		row = self._run()[0]
-		self.assertEqual(row["camps_planned"], 3)
-		self.assertEqual(row["camps_held"], 1)
-		self.assertEqual(row["camps_cancelled"], 1)
+		self.assertEqual(row["sessions_planned"], 3)
+		self.assertEqual(row["sessions_held"], 1)
+		self.assertEqual(row["sessions_cancelled"], 1)
 
-	def test_patients_per_camp_divides_by_camps_held_not_scheduled(self):
+	def test_patients_per_session_divides_by_sessions_held_not_scheduled(self):
 		session = self._make_session()
 		self._make_encounter(session)
 		self._make_encounter(session)
 		self._make_session(status="Planned")
 
-		self.assertEqual(self._run()[0]["patients_per_camp"], 2)
+		self.assertEqual(self._run()[0]["patients_per_session"], 2)
 
 	def test_rejects_an_unknown_grouping(self):
 		self.assertRaises(
