@@ -51,10 +51,10 @@ class IntegrationTestMedicineUtilisationReport(IntegrationTestCase):
 		# districts; a shared one would make the quantities cumulative.
 		self.district = f"Medicine Report District {frappe.generate_hash(length=6)}"
 		self.other_district = f"Medicine Report District {frappe.generate_hash(length=6)}"
-		self.site = self._make_site(self.district)
-		self.other_site = self._make_site(self.other_district)
+		self.site = self.make_site(self.district)
+		self.other_site = self.make_site(self.other_district)
 
-	def _make_site(self, district):
+	def make_site(self, district):
 		location = frappe.get_doc(
 			{
 				"doctype": "Bandhu Location",
@@ -77,7 +77,7 @@ class IntegrationTestMedicineUtilisationReport(IntegrationTestCase):
 			.name
 		)
 
-	def _make_session(self, date=None, site=None, unit=None):
+	def make_session(self, date=None, site=None, unit=None):
 		return (
 			frappe.get_doc(
 				{
@@ -95,7 +95,7 @@ class IntegrationTestMedicineUtilisationReport(IntegrationTestCase):
 			.name
 		)
 
-	def _make_patient(self):
+	def make_patient(self):
 		return (
 			frappe.get_doc(
 				{
@@ -108,11 +108,11 @@ class IntegrationTestMedicineUtilisationReport(IntegrationTestCase):
 			.name
 		)
 
-	def _make_encounter(self, session, prescriptions, patient=None):
+	def make_encounter(self, session, prescriptions, patient=None):
 		return frappe.get_doc(
 			{
 				"doctype": "Patient Encounter",
-				"patient": patient or self._make_patient(),
+				"patient": patient or self.make_patient(),
 				"practitioner": self.doctor,
 				"encounter_date": today(),
 				"encounter_time": nowtime(),
@@ -123,7 +123,7 @@ class IntegrationTestMedicineUtilisationReport(IntegrationTestCase):
 			}
 		).insert(ignore_permissions=True)
 
-	def _run(self, **filters):
+	def run_report(self, **filters):
 		filters.setdefault("from_date", today())
 		filters.setdefault("to_date", today())
 		filters.setdefault("district", self.district)
@@ -131,10 +131,10 @@ class IntegrationTestMedicineUtilisationReport(IntegrationTestCase):
 		return rows
 
 	def test_sums_quantity_prescribed_against_quantity_dispensed(self):
-		patient = self._make_patient()
-		first_session = self._make_session()
-		second_session = self._make_session()
-		self._make_encounter(
+		patient = self.make_patient()
+		first_session = self.make_session()
+		second_session = self.make_session()
+		self.make_encounter(
 			first_session,
 			[
 				{"medicines": self.item, "quantity": 10, "dispensed": 1},
@@ -142,9 +142,9 @@ class IntegrationTestMedicineUtilisationReport(IntegrationTestCase):
 			],
 			patient=patient,
 		)
-		self._make_encounter(second_session, [{"medicines": self.item, "quantity": 6, "dispensed": 1}])
+		self.make_encounter(second_session, [{"medicines": self.item, "quantity": 6, "dispensed": 1}])
 
-		[row] = self._run()
+		[row] = self.run_report()
 		self.assertEqual(row["sessions"], 2)
 		self.assertEqual(row["patients"], 2)
 		self.assertEqual(row["times_prescribed"], 3)
@@ -154,19 +154,19 @@ class IntegrationTestMedicineUtilisationReport(IntegrationTestCase):
 		self.assertEqual(row["quantity_not_dispensed"], 4)
 
 	def test_counts_a_dispense_with_no_quantity_recorded(self):
-		self._make_encounter(self._make_session(), [{"medicines": self.item, "dispensed": 1}])
+		self.make_encounter(self.make_session(), [{"medicines": self.item, "dispensed": 1}])
 
-		[row] = self._run()
+		[row] = self.run_report()
 		self.assertEqual(row["times_dispensed"], 1)
 		self.assertEqual(row["quantity_dispensed"], 0)
 
 	def test_splits_the_same_medicine_by_unit(self):
-		self._make_encounter(self._make_session(), [{"medicines": self.item, "quantity": 3}])
-		self._make_encounter(
-			self._make_session(unit=self.other_unit), [{"medicines": self.item, "quantity": 5}]
+		self.make_encounter(self.make_session(), [{"medicines": self.item, "quantity": 3}])
+		self.make_encounter(
+			self.make_session(unit=self.other_unit), [{"medicines": self.item, "quantity": 5}]
 		)
 
-		quantity_by_unit = {row["unit"]: row["quantity_prescribed"] for row in self._run()}
+		quantity_by_unit = {row["unit"]: row["quantity_prescribed"] for row in self.run_report()}
 		self.assertEqual(
 			quantity_by_unit,
 			{
@@ -176,21 +176,23 @@ class IntegrationTestMedicineUtilisationReport(IntegrationTestCase):
 		)
 
 	def test_district_filter_leaves_out_other_districts(self):
-		self._make_encounter(self._make_session(), [{"medicines": self.item, "quantity": 3}])
-		self._make_encounter(
-			self._make_session(site=self.other_site), [{"medicines": self.item, "quantity": 5}]
+		self.make_encounter(self.make_session(), [{"medicines": self.item, "quantity": 3}])
+		self.make_encounter(
+			self.make_session(site=self.other_site), [{"medicines": self.item, "quantity": 5}]
 		)
 
-		self.assertEqual([row["quantity_prescribed"] for row in self._run()], [3])
-		self.assertEqual([row["quantity_prescribed"] for row in self._run(district=self.other_district)], [5])
+		self.assertEqual([row["quantity_prescribed"] for row in self.run_report()], [3])
+		self.assertEqual(
+			[row["quantity_prescribed"] for row in self.run_report(district=self.other_district)], [5]
+		)
 
 	def test_leaves_out_sessions_outside_the_period(self):
-		self._make_encounter(self._make_session(), [{"medicines": self.item, "quantity": 3}])
-		self._make_encounter(
-			self._make_session(date=add_days(today(), -40)), [{"medicines": self.item, "quantity": 7}]
+		self.make_encounter(self.make_session(), [{"medicines": self.item, "quantity": 3}])
+		self.make_encounter(
+			self.make_session(date=add_days(today(), -40)), [{"medicines": self.item, "quantity": 7}]
 		)
 
-		self.assertEqual([row["quantity_prescribed"] for row in self._run()], [3])
+		self.assertEqual([row["quantity_prescribed"] for row in self.run_report()], [3])
 
 	def test_medicine_filter_leaves_out_other_medicines(self):
 		baseline_item = frappe.db.get_value("Item", self.item, ["item_group", "stock_uom"], as_dict=True)
@@ -206,16 +208,16 @@ class IntegrationTestMedicineUtilisationReport(IntegrationTestCase):
 			.insert(ignore_permissions=True)
 			.name
 		)
-		self._make_encounter(
-			self._make_session(),
+		self.make_encounter(
+			self.make_session(),
 			[
 				{"medicines": self.item, "quantity": 3},
 				{"medicines": other_item, "quantity": 5},
 			],
 		)
 
-		self.assertEqual(len(self._run()), 2)
-		[row] = self._run(medicine=other_item)
+		self.assertEqual(len(self.run_report()), 2)
+		[row] = self.run_report(medicine=other_item)
 		self.assertEqual(row["medicine"], other_item)
 		self.assertEqual(row["quantity_prescribed"], 5)
 
