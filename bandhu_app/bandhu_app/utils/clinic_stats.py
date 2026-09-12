@@ -23,7 +23,6 @@ def count_encounters(session_names: list) -> dict:
 			frappe.qb.from_(encounter)
 			.select(
 				encounter.custom_clinic_session.as_("session"),
-				# One patient seen twice in a session is one patient, not two.
 				Count(encounter.patient).distinct().as_("patients"),
 				Sum(completed).as_("completed"),
 			)
@@ -83,11 +82,7 @@ def find_session_patients(session_names: list) -> set:
 
 
 def find_first_encounter_sessions(patients: set) -> dict:
-	"""The session holding each patient's earliest encounter, over their whole history.
-
-	Ranking in Python rather than SQL keeps this two flat queries instead of the
-	per-row correlated subquery it used to be.
-	"""
+	"""The session holding each patient's earliest encounter, over their whole history."""
 	encounter = frappe.qb.DocType("Patient Encounter")
 
 	first_by_patient = {}

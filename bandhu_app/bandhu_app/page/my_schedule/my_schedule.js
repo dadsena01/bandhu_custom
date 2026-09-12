@@ -37,7 +37,6 @@ function renderDetail(session) {
 			  ) +
 			  "</div>"
 			: "") +
-		// A referral destination, not part of the session's identity — present, never competing.
 		(session.phcchc
 			? '<div class="detail-aside">' +
 			  __("Nearest PHC / CHC") +

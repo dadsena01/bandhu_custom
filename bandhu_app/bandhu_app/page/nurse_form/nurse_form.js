@@ -192,8 +192,6 @@ function dispatchNurseAction(page, encounter, action) {
 	}
 }
 
-// Both nurse queues are empty for most of a session -- the patients are with the front desk or the
-// doctor -- and the page said nothing about any of them.
 function renderSessionProgress(progress) {
 	const stages = [
 		[__("with doctor"), (progress.registered || 0) + (progress.with_doctor || 0)],
@@ -346,8 +344,7 @@ function openDispenseDialog(page, encounter) {
 						label: __("Instructions"),
 						read_only: 1,
 					},
-					// Not pre-ticked. This is the record of what was physically handed over, and
-					// it is what the donor-fund and stock reporting will count.
+					// Unticked by default: this records what was actually handed over.
 					{
 						fieldtype: "Check",
 						fieldname: "dispensed",
@@ -364,8 +361,6 @@ function openDispenseDialog(page, encounter) {
 				.filter((prescription) => prescription.dispensed)
 				.map((prescription) => prescription.name);
 
-			// Completing with nothing ticked is legitimate -- the medicine can be out of stock --
-			// but it should be a decision, not what happens when the nurse taps straight through.
 			if (!dispensedRows.length) {
 				frappe.confirm(
 					__("Nothing is ticked. Finish this visit with no medicine handed over?"),
@@ -521,8 +516,6 @@ function renderQueueActionButtons(encounter, action) {
 	return '<div class="nurse-action-btns">' + buttons.join("") + "</div>";
 }
 
-// What the doctor actually asked for. It is already in the payload, and reading it off the row
-// saves opening a dialog for every patient just to find out which test to run.
 function renderQueueOrder(encounter, action) {
 	const items =
 		action === "test"
@@ -534,13 +527,9 @@ function renderQueueOrder(encounter, action) {
 	return '<span class="queue-order">' + frappe.utils.escape_html(named.join(", ")) + "</span>";
 }
 
-// Time since the patient registered, not since the doctor sent them: no state change is
-// timestamped, so this is the honest number -- and who has been in the session longest is what
-// the nurse needs anyway.
 function renderTimeInSession(encounter) {
 	if (!encounter.creation) return "";
 
-	// The column heading already says what this is, so the cell is just the duration.
 	return frappe.datetime.comment_when(encounter.creation, true);
 }
 
@@ -636,8 +625,7 @@ async function refreshDashboard() {
 	await frappe.require(SESSION_UI_ASSET);
 	bandhu.session_ui.add_refresh_icon(nursePage, refreshDashboard);
 	await bandhu.session_ui.refresh_page(nursePage, loadDashboard);
-	// After the load, not before: the session's room can only be joined once the page knows which
-	// session it is showing.
+	// Join the session room only after the load says which session this is.
 	bandhu.session_ui.subscribe_to_board_updates(
 		"nurse-form",
 		() => (nurseSession ? nurseSession.session_name : null),

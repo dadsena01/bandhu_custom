@@ -69,9 +69,6 @@ def get_session_status() -> dict:
 	}
 
 
-# India and Nepal are the two source countries CMID actually registers patients from; the
-# form shows them as fixed quick-tap tabs rather than reading them from the Country master,
-# which holds all 250 countries and has no "is common" flag of its own.
 QUICK_COUNTRIES = ["India", "Nepal"]
 
 
@@ -97,8 +94,6 @@ def get_form_options() -> dict:
 
 SEARCH_LIMIT = 20
 
-# A single character matches most of the patient master, and every row it returns is one tap
-# away from being queued as the wrong person.
 MIN_SEARCH_LENGTH = 2
 
 
@@ -124,8 +119,7 @@ def search_patient(query: str) -> dict:
 			["dob", "like", like],
 		],
 		fields=["name", "patient_name", "custom_bandhu_id", "sex", "dob"],
-		# One past the limit, so the front desk can be told the list was cut rather than
-		# assuming the patient they want is not registered.
+		# One extra row tells the front desk the list was cut.
 		limit=SEARCH_LIMIT + 1,
 	)
 	capped = len(results) > SEARCH_LIMIT
@@ -151,9 +145,6 @@ def get_patient_card_html(patient: str) -> str:
 
 
 def require_running_session(session_name: str) -> dict:
-	# Registration is gated on the session's status, not just the caller's role: the session
-	# resolves the LSG and unit codes baked into the patient's permanent Clinic ID, and a
-	# cancelled or not-yet-started session would stamp a location the patient was never seen at.
 	session_doc = frappe.db.get_value(
 		"Bandhu Clinic Session",
 		session_name,
@@ -175,14 +166,6 @@ def require_running_session(session_name: str) -> dict:
 
 
 def resolve_registration_origin(session: str) -> tuple[str | None, str | None]:
-	"""The LSG and unit whose numeric codes get baked into the patient's Clinic ID.
-
-	Both are required here. make_clinic_id falls back to a reserved "unknown" code so a patient
-	registered with no session context still gets a well-formed ID, but a session always has a
-	site and a unit -- if either has no numeric code that is an unfilled master, and letting it
-	through stamps "unknown location" into an identifier that is permanent and already printed
-	on the patient's card by the time anyone notices.
-	"""
 	session_site, unit = frappe.db.get_value("Bandhu Clinic Session", session, ["site", "unit"])
 	location = frappe.db.get_value("Site", session_site, "location") if session_site else None
 
@@ -218,10 +201,7 @@ MAX_PLAUSIBLE_AGE = 120
 
 
 def resolve_dob(dob: str | None, age: float | None) -> str:
-	"""Field registration often can't get an exact birth date out of a migrant worker who knows
-	their age but not their birthday. Jan 1 of the birth year marks the DOB as an estimate rather
-	than today's month and day, which would read as a real recorded birthday it isn't. An explicit
-	DOB always wins over a derived one."""
+	"""An age-only registration gets Jan 1 of the birth year, marking the date as an estimate."""
 	dob = (dob or "").strip()
 	if dob:
 		return dob
@@ -234,10 +214,7 @@ def resolve_dob(dob: str | None, age: float | None) -> str:
 	return f"{getdate().year - int(flt(age))}-01-01"
 
 
-# Deliberately a warning the front desk answers, not a rule the server enforces: migrant workers
-# routinely share one mobile number between brothers, and two people can carry the same name and
-# birth year. What must not happen silently is a second permanent Clinic ID and a second printed
-# card for someone already registered.
+# A warning, not a block: family members often share one mobile number.
 @frappe.whitelist()
 def find_possible_duplicate(
 	full_name: str,
@@ -254,8 +231,6 @@ def find_possible_duplicate(
 	if not full_name:
 		return None
 
-	# Strongest identifier first: ABHA is one person nationally, a mobile can be shared, and a
-	# name with a birth date is the weakest of the three.
 	candidates = []
 	if abha_id:
 		candidates.append((_("the same ABHA ID"), {"custom_abha_id": abha_id}))
@@ -410,8 +385,6 @@ def create_encounter(patient: str, session: str) -> str:
 			"patient_age": patient_doc.get_age(),
 			"practitioner": session_doc.assigned_doctor,
 			"custom_clinic_session": session,
-			# LSG, district and state on the encounter all fetch from this one link, and nothing
-			# had ever set it -- which is why all three read empty on every visit ever recorded.
 			"custom_location": frappe.db.get_value("Site", session_doc.site, "location")
 			if session_doc.site
 			else None,
@@ -428,9 +401,7 @@ def create_encounter(patient: str, session: str) -> str:
 def get_today_queue(session: str) -> list:
 	require_session_access(session)
 
-	# Read the encounters, not Patient Queue. That table holds one row per patient, overwritten
-	# on every visit, so as soon as a patient attends a later session their row moves with them and
-	# this session quietly loses them. The encounter is the visit.
+	# Patient Queue keeps one row per patient across visits, so read the encounters.
 	rows = frappe.get_all(
 		"Patient Encounter",
 		filters={"custom_clinic_session": session, "docstatus": ["<", 2]},

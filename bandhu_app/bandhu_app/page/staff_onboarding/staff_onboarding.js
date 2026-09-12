@@ -168,8 +168,6 @@ async function submitOnboarding(page) {
 	renderCreated(page, result, values);
 }
 
-// Two steps, not one screen that keeps growing: the form is done, so it goes away and the page
-// says plainly what was created and what is left to do.
 const MAX_STAFF_DOCUMENTS = 10;
 
 let pendingDocuments = [];
@@ -276,11 +274,8 @@ function pickDocument(page) {
 	const staffUser = page.main.find(".onboarding-done").data("staff-user");
 
 	new frappe.ui.FileUploader({
-		// Attached to the User, so the file lands in that person's Attachments sidebar -- the
-		// place an admin already looks for anything belonging to them.
 		doctype: "User",
 		docname: staffUser,
-		// Never public: an ID scan behind a guessable URL is readable without logging in at all.
 		disable_file_browser: true,
 		allow_multiple: false,
 		restrictions: { max_file_size: 5 * 1024 * 1024 },
@@ -301,8 +296,6 @@ function markDocumentsChanged(page) {
 	renderDoneActions(page);
 }
 
-// One filled button, and it is always the next thing to do: save the documents if any are
-// waiting, otherwise start on the next person.
 function renderDoneActions(page) {
 	const save = documentsSaved
 		? ""

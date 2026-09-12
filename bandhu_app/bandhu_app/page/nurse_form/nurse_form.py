@@ -93,10 +93,7 @@ def get_upcoming_sessions() -> list:
 
 def load_session_for_status_change(session_name: str) -> dict:
 	require_session_access(session_name)
-	# for_update locks the row for the rest of this transaction, so a second request opening or
-	# closing the same session waits here and then reads the committed status — without it both
-	# requests read Planned, both pass the guards below, and the second write silently replaces
-	# the first session's start_time, which is what Session Report and "Sessions Late To Open" read.
+	# for_update makes a second open or close request wait and read the committed status.
 	session_doc = frappe.db.get_value(
 		"Bandhu Clinic Session",
 		session_name,
@@ -118,13 +115,10 @@ def start_session(session_name: str) -> None:
 
 	if session_doc.status == "In Progress":
 		frappe.throw(_("This session is already open."))
-	# Reopening a closed session would let patients be registered against it hours or days
-	# later, with nothing in the record showing the session had already been signed off.
 	if session_doc.status == "Completed":
 		frappe.throw(
 			_("This session is already closed and cannot be reopened."),
 		)
-	# A session opened on the wrong date counts as running today on every board and dashboard.
 	if str(session_doc.date) != frappe.utils.today():
 		frappe.throw(_("You can only open a session on the day it is scheduled."))
 
@@ -169,8 +163,6 @@ def get_completed_patients(session_name: str) -> list:
 	return get_session_encounters(session_name, "Completed")
 
 
-# The nurse only ever sees the two states that are hers, so between batches the page went blank
-# while a session of forty was running around her. This is the shape of the session in one line.
 SESSION_PROGRESS_STATES = {
 	"registered": "Waiting for Doctor",
 	"with_doctor": "Awaiting Doctor Review",
@@ -184,8 +176,7 @@ SESSION_PROGRESS_STATES = {
 def get_session_progress(session_name: str) -> dict:
 	require_session_access(session_name)
 
-	# v16 refuses an aggregate written as a string in `fields`, so this goes through the query
-	# builder rather than five separate frappe.db.count calls.
+	# v16 rejects an aggregate string in `fields`, so use the query builder.
 	encounter = frappe.qb.DocType("Patient Encounter")
 	counts = (
 		frappe.qb.from_(encounter)
@@ -219,9 +210,6 @@ def submit_test_results(encounter: str, results: list | str) -> None:
 		row.result_type = result.get("result_type")
 		row.result_value = result.get("result_value")
 
-	# Sending a patient back with a blank result puts an ordered test in front of the doctor
-	# marked reviewed and carrying nothing. "Not Done" is the honest way to say a test could not
-	# be run, so there is no reason left to leave one empty.
 	for row in doc.custom_test_instructions:
 		if not row.result_type:
 			frappe.throw(
@@ -271,7 +259,6 @@ def record_vitals(
 				_("{0} of {1} is outside what a person can record. Check the entry.").format(label, value)
 			)
 
-	# Half a blood pressure is not a reading, and the old code dropped it without a word.
 	if (bp_systolic is None) != (bp_diastolic is None):
 		frappe.throw(_("Blood pressure needs both the systolic and the diastolic number."))
 	if bp_systolic is not None and flt(bp_diastolic) >= flt(bp_systolic):

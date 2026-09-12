@@ -50,8 +50,6 @@ def get_form_options() -> dict:
 
 
 def last_used_defaults() -> dict:
-	"""Prefill from the most recently created session — the next ad hoc session is usually run
-	by the same team at the same time as the last one."""
 	recent = frappe.get_all(
 		"Bandhu Clinic Session",
 		fields=["planned_start_time", "planned_end_time", "project"],
@@ -68,13 +66,10 @@ def last_used_defaults() -> dict:
 
 
 def as_session_draft(values) -> "frappe.model.document.Document":
-	"""Turn the form's payload into an unsaved session so the same clash check serves the
-	live warning and the real save."""
 	values = frappe.parse_json(values) or {}
 
 	draft = frappe.new_doc("Bandhu Clinic Session")
-	# Only the form's own fields are copied: passing the whole payload to update() let a
-	# caller set name, owner or docstatus.
+	# Copy only form fields so a caller cannot set name, owner or docstatus.
 	draft.update({field: values[field] for field in ACCEPTED_FIELDS if values.get(field) not in (None, "")})
 	return draft
 

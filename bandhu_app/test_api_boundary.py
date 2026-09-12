@@ -73,8 +73,7 @@ class TestApiBoundary(IntegrationTestCase):
 		cls.gender = frappe.get_all("Gender", limit=1, pluck="name")[0]
 
 	def setUp(self):
-		# Rollback is per class, so every test builds its own session and asserts against that
-		# session only. Sharing one would make each test read the previous test's rows.
+		# Rollback is per class, so each test builds its own session.
 		self.suffix = frappe.generate_hash(length=8)
 		self.driver = self.make_practitioner("Clinic Assistant cum Driver")
 		self.doctor = self.make_practitioner("Doctor")
@@ -250,12 +249,6 @@ class TestApiBoundary(IntegrationTestCase):
 		self.assertEqual(doc.custom_test_instructions, [])
 
 	def test_the_cache_busting_keys_the_client_adds_are_dropped_not_fatal(self):
-		"""`frappe.call` ships `cmd`, `_` and friends; none of them are function arguments.
-
-		The registration origin is asserted alongside, so a signature whose parameter names
-		drift away from the wire keys fails here instead of silently registering the patient
-		with no session behind them.
-		"""
 		frappe.set_user(self.cad_user)
 		patient = call_over_http(
 			f"{CAD}.register_patient", _="1755000000000", freeze="true", **self.register_args()

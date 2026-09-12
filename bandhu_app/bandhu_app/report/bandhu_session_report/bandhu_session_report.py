@@ -33,8 +33,6 @@ def validate_filters(filters):
 	if getdate(filters.from_date) > getdate(filters.to_date):
 		frappe.throw(_("From Date cannot be after To Date."))
 
-	# Every session in the period is fetched with its child-table counts, so an unbounded span is
-	# one request that grows without limit as the programme runs.
 	if date_diff(filters.to_date, filters.from_date) > MAX_REPORT_DAYS:
 		frappe.throw(_("Choose a period of {0} days or less.").format(MAX_REPORT_DAYS))
 
@@ -158,8 +156,6 @@ def hours_between(start, end) -> float:
 
 
 def build_chart(rows: list) -> dict:
-	"""One bar per day, not per session — several sessions share a date, and repeated
-	x-labels get truncated to an unreadable stub once the bars are narrow."""
 	by_date = {}
 	for row in rows:
 		day = by_date.setdefault(row["date"], {"patients": 0, "new_patients": 0})

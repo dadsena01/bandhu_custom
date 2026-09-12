@@ -76,7 +76,6 @@
 	white-space: nowrap;
 }
 
-/* The visit count is context, not a call to act, so it stays quiet beside the patient's name. */
 .doctor-dash .visit-tag {
 	font-size: var(--text-xs);
 	color: var(--text-light);
@@ -182,8 +181,6 @@
 	text-decoration: underline;
 }
 
-/* One patient is in the room, so this card is the only thing on the page with a filled
-   button on it. Everything below is a list to read, not a wall of things to press. */
 .doctor-dash .room-card {
 	border: 1px solid var(--border-color);
 	border-radius: var(--border-radius-md);
@@ -311,7 +308,6 @@
 	font-size: var(--text-base);
 }
 
-/* Once somebody is in the room the strip is a footnote under their card, not the main event. */
 .doctor-dash .call-strip.is-slim {
 	justify-content: flex-start;
 	padding: var(--padding-sm) var(--padding-md);
@@ -348,8 +344,6 @@
 	border-radius: var(--border-radius-md);
 }
 
-/* Not `overflow: hidden` to round the corners: a row's own dropdown menu is taller than the
-   row, and clipping the list clipped the menu with it. */
 .doctor-dash .queue-row:first-child {
 	border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
 }
@@ -375,14 +369,10 @@
 	background: var(--bg-color);
 }
 
-/* Back from the nurse means the visit is nearly finished, so these sit above new arrivals
-   and carry a tint rather than a fourth section heading. */
 .doctor-dash .queue-row.is-back {
 	background: var(--bg-color);
 }
 
-/* Name and identity on one line, what was done on its own line under them. Wrapped as one
-   flex line, a two-line clinical summary started from wherever the Clinic ID happened to end. */
 .doctor-dash .queue-row .row-name {
 	display: flex;
 	flex-direction: column;
@@ -444,13 +434,11 @@
 	font-variant-numeric: tabular-nums;
 }
 
-/* A finished patient is a record, not work. */
 .doctor-dash .queue-section.is-done .row-patient {
 	font-weight: var(--weight-regular);
 	color: var(--text-muted);
 }
 
-/* Fixed-length identifiers line up only in a monospaced face. */
 .doctor-dash .clinic-id {
 	font-family: "SF Mono", "Roboto Mono", Menlo, Consolas, monospace;
 }
@@ -468,8 +456,6 @@
 		padding: 0 var(--padding-sm);
 	}
 
-	/* The name and its identity line take the full width on a phone, so `margin-left: auto`
-	   dropped the back-to-waiting button onto a row of its own. Pin it to the name instead. */
 	.doctor-dash .room-head {
 		flex-wrap: nowrap;
 		align-items: flex-start;
@@ -479,8 +465,6 @@
 		flex: 1 1 auto;
 	}
 
-	/* Details reads as a link on desktop, where it sits in a row of real buttons. Alone on a
-	   phone row beside the overflow menu it just looked unfinished. */
 	.doctor-dash .room-actions .room-details {
 		flex: 1 1 auto;
 		background: var(--btn-default-bg);
@@ -507,8 +491,6 @@
 		flex: 1 1 40%;
 	}
 
-	/* Without this the auto margin holds Details and the overflow menu on the same line as the
-	   two clinical actions, and every label breaks across two lines to fit. */
 	.doctor-dash .room-actions-gap {
 		margin-left: 0;
 		flex-basis: 100%;

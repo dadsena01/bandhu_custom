@@ -89,8 +89,6 @@ class IntegrationTestStaffOnboarding(IntegrationTestCase):
 		self.assertEqual(practitioner.status, "Active")
 
 	def test_provision_works_without_a_last_name(self):
-		"""last_name had no default, so the page omitting it for a one-name staff member made the
-		whole call fail with a 500 before any validation ran."""
 		frappe.set_user(self.system_manager_user)
 		try:
 			result = provision_staff_member(
@@ -133,7 +131,6 @@ class IntegrationTestStaffOnboarding(IntegrationTestCase):
 			frappe.set_user("Administrator")
 
 	def test_a_document_without_a_name_is_rejected(self):
-		"""The name is the only thing that says what the file is."""
 		staff_user = self._provision("test.onboard.unnamed@bandhuapp.test")
 
 		frappe.set_user(self.system_manager_user)
@@ -148,7 +145,6 @@ class IntegrationTestStaffOnboarding(IntegrationTestCase):
 			frappe.set_user("Administrator")
 
 	def test_a_public_upload_is_forced_private(self):
-		"""An ID scan behind a guessable /files/ URL is readable without logging in at all."""
 		staff_user = self._provision("test.onboard.publicfile@bandhuapp.test")
 		public_file = frappe.get_doc(
 			{

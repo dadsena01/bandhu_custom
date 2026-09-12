@@ -2,13 +2,7 @@ import frappe
 
 from bandhu_app.bandhu_app.page.cad_form.cad_form import require_cad_access
 
-# The first 6 states were sourced and verified during CMID onboarding, since they're the
-# app's actual major migrant-source states. The rest, added later so every state offers a
-# real district list instead of free text, are compiled from general knowledge of India's
-# administrative divisions rather than an official register -- district boundaries do get
-# reorganised (Madhya Pradesh, Andhra Pradesh, Telangana and Rajasthan all have in the last
-# few years), so treat these as a strong starting point and spot-check against the Census of
-# India or the state's own portal before relying on them for anything beyond a suggestion.
+# Only the first 6 states are verified; check the rest against the Census before relying on them.
 STATE_DISTRICTS: dict[str, list[str]] = {
 	"Bihar": [
 		"Araria",
