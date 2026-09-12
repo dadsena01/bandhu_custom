@@ -10,15 +10,20 @@ import frappe
 #
 # Matched by rule rather than by name: an earlier hardcoded list ("Framework", "Quality",
 # "Marley Health") missed every ERPNext icon and named one that does not exist on this
-# site at all. Restricting the top-level icons is enough — children render under their
-# parent, so hiding the parent hides the branch.
-ALLOWED_ROLES = ["System Manager"]
+# site at all. Restricting the top-level icons is enough — get_desktop_icons drops any child
+# whose parent did not pass its own permission check, so hiding the parent hides the branch.
+#
+# Administrator rather than System Manager: CMID's own administrators hold System Manager, and
+# an ERPNext install puts twenty tiles they never open (Accounting, Buying, Manufacturing,
+# Selling, Stock, Subcontracting, Quality, Assets, Projects) on the same grid as the four
+# screens they do. The built-in Administrator login is the only holder of this role, so every
+# module stays one click away for us without being in their way.
+ALLOWED_ROLES = ["Administrator"]
 
 # Custom desk-icon artwork, keyed by Workspace name. CAD/Doctor/Nurse get a role-colored
 # glyph — plain circle, no name, no photo, so the same image is correct for every
-# practitioner in that role. Admin isn't a role (its Desktop Icon is already restricted to
-# System Manager above), so it gets the same neutral badge shape in a plain grey, not a role
-# color. Frappe's own Icon fieldtype only picks from its bundled sprite set;
+# practitioner in that role. Admin isn't a role, so it gets the same neutral badge shape in a
+# plain grey, not a role color. Frappe's own Icon fieldtype only picks from its bundled sprite set;
 # Desktop Icon.icon_image (Attach) is the one field that renders a plain <img> instead
 # (frappe/public/js/frappe/ui/desktop_icon.html), which is why this targets Desktop Icon
 # and not Workspace.icon.
@@ -31,7 +36,7 @@ DESK_ICON_IMAGE_BY_WORKSPACE = {
 
 
 def restrict_other_app_desktop_icons():
-	"""Hide other apps' top-level desk icons from everyone but System Manager."""
+	"""Hide other apps' top-level desk icons from everyone but Administrator."""
 	# Desktop Icon.app carries the exact same landmine sync_bandhu_desktop_icons already
 	# works around on Workspace.app: it is only as good as whatever app was active in the
 	# Desk UI at creation time, and every one of this app's own 9 icons has it blank. Filtering
