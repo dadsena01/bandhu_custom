@@ -1,8 +1,6 @@
 import frappe
 from frappe.permissions import add_permission, update_permission_property
 
-# The documents table sits at permlevel 1 so a staff member's ID scans and licences are not
-# readable by everyone who can open a User record, including the staff member themselves.
 DOCUMENT_ROLES = ("System Manager",)
 
 

@@ -1,8 +1,7 @@
 import frappe
 from frappe import _
 
-# custom/patient_encounter.json defaults appointment_type to this via a Property Setter,
-# so it has to exist or every encounter insert fails.
+# A Property Setter defaults appointment_type to this, so encounter inserts need it.
 DEFAULT_APPOINTMENT_TYPE = "Walk-In"
 
 

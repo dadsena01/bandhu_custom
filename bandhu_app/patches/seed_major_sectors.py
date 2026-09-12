@@ -1,10 +1,6 @@
 import frappe
 
-# The CAD registration form now shows quick-tap tabs for these sectors, per CMID's
-# explicit list, and reveals a full picker only for "Other". The pre-existing master
-# used different wording ("Seafood Processing", "Plywood and Timber") that never
-# matched what the client asked for on the tabs, so those two are renamed in place
-# (rename_doc, not delete+recreate) to carry forward any patient already linked to them.
+# rename_doc, not delete and recreate, so linked patients follow.
 MAJOR_SECTORS = ["Construction", "Plywood", "Fish processing", "Waste collection", "Manufacturing"]
 RENAMES = {
 	"Seafood Processing": "Fish processing",
@@ -32,9 +28,6 @@ def execute():
 				}
 			).insert(ignore_permissions=True)
 
-	# "Other" is a real, selectable Sectors record (not a UI-only placeholder) so that
-	# tapping the form's "Other" tab still stores a valid Link value; it is deliberately
-	# not a major sector, since the form always appends it as the last tab regardless.
 	if not frappe.db.exists("Sectors", "Other"):
 		frappe.get_doc({"doctype": "Sectors", "employment_sector_name": "Other"}).insert(
 			ignore_permissions=True

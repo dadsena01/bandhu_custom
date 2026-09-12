@@ -6,12 +6,8 @@ from bandhu_app.bandhu_app.utils.patient_encounter import (
 	seed_default_appointment_type,
 )
 
-# A fresh site has none of Clinic/Site/Unit/Bandhu Projects/Appointment Type/State. Every
-# test class here calls this in setUpClass instead of assuming that data exists.
-
 
 def ensure_baseline_fixtures() -> dict[str, str]:
-	"""Idempotent: reuses what exists, creates only what's missing."""
 	state = _get_or_create_state()
 	location = _get_or_create_location(state)
 	project = _get_or_create_project()

@@ -311,8 +311,6 @@
 		--dot: 9px;
 	}
 
-	/* Site, time and clinic each take the full width: side by side in a phone-width card the
-	   site name wrapped to four lines while the time column stayed pinned to the right. */
 	.my-schedule .sched-where,
 	.my-schedule .sched-meta {
 		flex: 1 1 100%;
@@ -323,7 +321,6 @@
 		white-space: normal;
 	}
 
-	/* Stacked, the caret would sit centred on a line of its own under the card. */
 	.my-schedule .sched-row {
 		position: relative;
 		padding-right: var(--padding-xl);

@@ -9,9 +9,7 @@
 frappe.provide("bandhu.session_ui");
 
 (function () {
-	// frappe.call REJECTS on network failure (frappe/public/js/frappe/request.js:32-41). Without
-	// this wrapper the rejection escapes unhandled and page.main is never written, leaving staff
-	// on a weak session signal staring at a blank screen with no message and no way to retry.
+	// frappe.call rejects on network failure; unhandled, the page stays blank.
 	async function refresh_page(page, load) {
 		try {
 			await load(page);
@@ -22,21 +20,15 @@ frappe.provide("bandhu.session_ui");
 		}
 	}
 
-	// Server side, bandhu_app.bandhu_app.utils.realtime pushes this whenever a session moves, into
-	// that session's own document room. Each board answers it by re-reading its own queues.
 	const BOARD_UPDATE_EVENT = "bandhu_board_update";
 	const BOARD_UPDATE_DOCTYPE = "Bandhu Clinic Session";
 
-	// A doctor completing three patients in a row is one re-read for everyone else, not three.
 	const BOARD_UPDATE_DELAY = 500;
 
 	let background_refresh_depth = 0;
 	const subscribed_routes = new Set();
 	const subscribed_rooms = new Map();
 
-	// The loaders freeze the screen so a tap during a slow fetch cannot land on a queue that is
-	// about to be replaced. A refresh nobody asked for must not do that -- a grey overlay every
-	// time somebody else acts is worse than the stale row it would prevent.
 	function freeze() {
 		if (!background_refresh_depth) frappe.dom.freeze();
 	}
@@ -45,11 +37,7 @@ frappe.provide("bandhu.session_ui");
 		if (!background_refresh_depth) frappe.dom.unfreeze();
 	}
 
-	// `refresh` is the page's own loader; `route` is its desk route. Desk keeps a page's DOM and
-	// module state alive after routing away, so a board nobody is looking at leaves the work to
-	// on_page_show instead of fetching for a hidden screen.
-	// The push goes to the session's own document room, so a board has to join that room and leave
-	// it again when the session changes. Called on every render, not once, for that reason.
+	// Called on every render so the board can switch session rooms.
 	function join_session_room(route, session) {
 		if (subscribed_rooms.get(route) === session) return;
 
@@ -63,8 +51,6 @@ frappe.provide("bandhu.session_ui");
 	function subscribe_to_board_updates(route, current_session, refresh) {
 		join_session_room(route, current_session());
 
-		// This file loads through frappe.require, so a page can only subscribe once it is already
-		// rendering -- which is every time it is shown, not once at load.
 		if (subscribed_routes.has(route)) return;
 		subscribed_routes.add(route);
 
@@ -124,8 +110,6 @@ frappe.provide("bandhu.session_ui");
 		);
 	}
 
-	// Desk's own icon group in the page header, which is where every other Desk page puts
-	// refresh. Called from on_page_load, so it survives the re-renders that replace page.main.
 	function add_refresh_icon(page, refresh) {
 		if (page.bandhu_refresh_icon) return;
 		page.bandhu_refresh_icon = page.add_action_icon(
@@ -136,9 +120,7 @@ frappe.provide("bandhu.session_ui");
 		);
 	}
 
-	// A session that is over and a session that is running have to be told apart across a phone screen
-	// in daylight, so the status is a labelled badge rather than a coloured dot: colour alone is
-	// the one signal that fails both a colour-blind reader and a washed-out outdoor screen.
+	// A labelled badge, not a dot, so status does not rely on colour alone.
 	const SESSION_STATUS_BADGES = {
 		"In Progress": { theme: "green", variant: "subtle" },
 		Planned: { theme: "blue", variant: "subtle" },
@@ -225,9 +207,6 @@ frappe.provide("bandhu.session_ui");
 		if (value === null || value === undefined || value === "") return "";
 		return (
 			'<div class="col-6 col-md-4 bandhu-detail">' +
-			// The glyph hangs in its own gutter so the label and the value it belongs to keep a
-			// single left edge. Inline, it indented the label off the value beneath it and gave
-			// every field two ragged edges.
 			(icon_name
 				? frappe.utils.icon(icon_name, "sm", "", "", "current-color bandhu-detail-icon")
 				: "") +
@@ -265,13 +244,7 @@ frappe.provide("bandhu.session_ui");
 		);
 	}
 
-	// One field labelled "Vitals" inside a section headed "Vitals" said the word twice and then
-	// crammed three separate measurements into a single middot-joined cell. Each reading is its
-	// own field, so each gets its own column and a nurse can find one without parsing a string.
-	//
-	// Height/weight/BMI/temperature can come from two places: what the patient carried in from
-	// registration, and what the nurse measured this visit. The visit's own reading is what is
-	// clinically true right now, so it wins whenever the nurse has recorded one.
+	// The nurse's reading from this visit wins over the registration value.
 	function format_vitals_details(patient, encounter) {
 		const height = encounter.custom_height
 			? encounter.custom_height + " cm"
@@ -316,8 +289,7 @@ frappe.provide("bandhu.session_ui");
 		);
 	}
 
-	// An omitted theme is deliberate: .es-badge's own default is gray, and there is no
-	// [data-theme="gray"] rule to name, so a closed session gets the neutral badge by leaving it off.
+	// No theme: .es-badge defaults to gray.
 	function format_badge(label, theme, variant) {
 		return (
 			'<span class="es-badge"' +

@@ -18,11 +18,7 @@ body:is(
 	padding-bottom: var(--padding-2xl);
 }
 
-/* Every Bandhu page reads in a centred --page-max-width column, but Desk's page header spans
-   the full content area. That left the title and the header button 60px outside the column the
-   page itself starts at -- two right edges stacked one above the other, 60px apart, which is
-   what the boards looked misaligned by. The header's .container carries the same 15px side
-   padding the page bodies do, so the same max-width lands both bands on the same edges. */
+/* Match the header width to the page column so their edges line up. */
 :is(
 	[data-page-route="cad-form"],
 	[data-page-route="doctor-form"],
@@ -51,15 +47,9 @@ body:is(
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	/* Desk sets 6px between a header button's glyph and its label (frappe page.scss:74). The
-	   boards sat at 5px, so the same control was a pixel narrower depending on which strip it
-	   was in. */
 	gap: 6px;
 }
 
-/* Same `margin: 0 auto` on Desk's .icon as above: harmless while a button is only as wide as
-   its label, but a stretched button (the mobile search row) hands those auto margins the spare
-   width and the glyph drifts to the far edge. */
 :is(
 	.cad-dash,
 	.doctor-dash,
@@ -71,9 +61,6 @@ body:is(
 	margin: 0;
 }
 
-/* Workspace blocks are laid out by the editor with no margin at all, so a section label sits
-   flush against its own cards and against the row above it -- the whole page reads as one
-   undifferentiated block. Give the labels room and the card rows a gap. */
 body:is(
 	[data-route="Workspaces/Admin"],
 	[data-route="Workspaces/Bandhu"],
@@ -95,17 +82,12 @@ body:is(
 	}
 }
 
-/* Frappe's Quick List hardcodes `prettyDate(doc.modified)` under every row
-   (frappe/public/js/frappe/widgets/quick_list_widget.js:149), so "Sessions: Next 7 Days" printed
-   "3 days ago" against a session planned for next week -- when the record was last edited, read as
-   when the session is. The filter picks the right sessions; only that line lies, and it is not
-   configurable, so it goes. */
+/* Quick List always prints doc.modified, which reads as the session date. */
 body[data-route="Workspaces/Dashboard"] .quick-list-item .timestamp {
 	display: none;
 }
 
-/* A recorded allergy, on the room card and at the head of the prescribe dialog. App-wide
-   rather than page-scoped because a Dialog renders outside .doctor-dash. */
+/* App-wide because a Dialog renders outside .doctor-dash. */
 .bandhu-allergy {
 	display: flex;
 	align-items: flex-start;
@@ -123,11 +105,7 @@ body[data-route="Workspaces/Dashboard"] .quick-list-item .timestamp {
 	margin: 2px 0 0;
 }
 
-/* The patient details dialog. These rules were written against utility classes
-   (gap-2, items-start, min-w-0, text-xs-semibold) that this Frappe build does not
-   ship, so every icon sat flush against its label and every value hung off the
-   label's right edge. Real declarations, and app-wide rather than page-scoped
-   because a Dialog renders outside .doctor-dash / .nurse-dash / .cad-dash. */
+/* App-wide because a Dialog renders outside the page containers. */
 .bandhu-details {
 	padding: var(--padding-xs) 0 var(--padding-sm);
 }
@@ -165,8 +143,7 @@ body[data-route="Workspaces/Dashboard"] .quick-list-item .timestamp {
 	margin-bottom: var(--margin-md);
 }
 
-/* Desk's own .icon ships `margin: 0 auto`, which in a flex row flings the glyph
-   away from the label it belongs to. */
+/* Desk's .icon has margin: 0 auto, which pushes the glyph away in a flex row. */
 .bandhu-details .bandhu-detail-icon {
 	margin: 2px 0 0;
 	flex-shrink: 0;
@@ -228,17 +205,12 @@ body[data-route="Workspaces/Dashboard"] .quick-list-item .timestamp {
 	margin-top: 2px;
 }
 
-/* An ID or a phone number is read back digit by digit, and only a monospaced face
-   keeps the digits in columns while that happens. */
 .bandhu-details .bandhu-fixed-width {
 	font-family: "SF Mono", "Roboto Mono", Menlo, Consolas, monospace;
 	font-size: var(--text-sm);
 }
 
-/* session_ui.js has always emitted `.es-badge` for the session status and every test result,
-   but nothing in this Frappe build ships that class -- the badges rendered as plain text, so a
-   Positive result read exactly like a Pending one. Defined here because session_ui.js is shared
-   by the CAD, Doctor and Nurse boards, which each load their own page-scoped stylesheet. */
+/* This Frappe build ships no .es-badge styles. */
 .es-badge {
 	display: inline-flex;
 	align-items: center;

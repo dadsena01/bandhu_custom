@@ -152,7 +152,6 @@
 	color: var(--text-muted);
 }
 
-/* An idle queue is a fact in passing, not a panel -- same call the doctor board makes. */
 .nurse-dash .queue-empty {
 	padding: var(--padding-md) 0;
 	font-size: var(--text-sm);
@@ -214,8 +213,6 @@
 	padding: 0 0 var(--padding-lg) 0;
 }
 
-/* nowrap, so the three buttons are the cell's minimum width and a long patient name wraps
-   instead of restacking them one per line. */
 .nurse-action-btns {
 	display: flex;
 	flex-wrap: nowrap;
@@ -223,8 +220,6 @@
 	justify-content: flex-end;
 }
 
-/* The actions column had no width of its own, so once the wait column joined the row the three
-   buttons stacked one per line and every row grew to three button-heights. */
 .nurse-dash .action-cell {
 	width: 1%;
 	white-space: nowrap;
@@ -235,8 +230,6 @@
 	white-space: nowrap;
 }
 
-/* Without this a long unbroken name (the dev site has patients named by a 60-character hash)
-   pushes the actions column off the right edge of the scroll box. */
 .nurse-dash .patient-cell {
 	overflow-wrap: anywhere;
 }

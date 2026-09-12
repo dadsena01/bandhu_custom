@@ -1,10 +1,7 @@
 import frappe
 from frappe.permissions import add_permission, update_permission_property
 
-# A Number Card runs through the report engine, so `read` on the doctype is not enough -- a role
-# without `report` gets a blocking "You don't have permission to get a report on ..." dialog the
-# moment it opens the Dashboard. Both roles already hold read here, so this grants no data they
-# could not already see.
+# Number Cards need `report` permission, not just `read`.
 SESSION_REPORT_ROLES = ("Director", "Programme Manager")
 
 

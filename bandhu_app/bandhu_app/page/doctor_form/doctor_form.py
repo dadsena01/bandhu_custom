@@ -111,8 +111,6 @@ def get_registered_patients():
 
 CALLABLE_WORKFLOW_STATES = ("Waiting for Doctor", "Awaiting Doctor Review")
 
-# A doctor works on a few patients at once -- one dressing, one waiting on a reading, one being
-# examined -- but a room that holds everybody is the old board again under a new heading.
 MAX_PATIENTS_WITH_DOCTOR = 3
 
 
@@ -147,7 +145,6 @@ def call_patient(encounter: str) -> None:
 
 @frappe.whitelist(methods=["POST"])
 def release_patient(encounter: str) -> None:
-	"""The patient did not come in. They keep their place in the queue, they just leave the room."""
 	require_doctor_access()
 
 	doc = load_owned_encounter(encounter)
@@ -188,11 +185,7 @@ def get_patient_history(patient: str):
 
 @frappe.whitelist()
 def get_patient_histories(patients: list | str) -> dict:
-	"""Return the encounter history for a whole queue in one call.
-
-	The page used to ask per patient, so a 40-patient session fired 40 parallel requests and
-	saturated the browser's connection pool on the weak links these sessions run on.
-	"""
+	"""Return the encounter history for a whole queue in one call."""
 	require_doctor_access()
 	patients = frappe.parse_json(patients)
 
@@ -253,8 +246,7 @@ def get_test_options() -> list[dict]:
 
 
 def apply_clinical_notes(doc, chief_complaint, past_history, allergy_history) -> None:
-	"""`is not None`, not truthiness. A doctor deleting a wrongly recorded allergy sends an empty
-	string, and a falsy check drops exactly that edit -- the one on this page that matters most."""
+	"""An empty string clears a note; None leaves it alone."""
 	if chief_complaint is not None:
 		doc.custom_chief_complaints = chief_complaint
 	if past_history is not None:
@@ -322,16 +314,12 @@ def prescribe_medicine(
 		medicine = (row.get("medicines") or "").strip()
 		if not medicine:
 			frappe.throw(_("Every prescription row needs a medicine."))
-		# There is no way to say "twice the dose" by listing a drug twice, so a repeat is a
-		# mistake -- and the person dispensing reads the list, not the doctor's intent.
 		if medicine in submitted:
 			frappe.throw(_("{0} is listed twice. Put the full dose on one row.").format(medicine))
 		if medicine in already_prescribed:
 			frappe.throw(_("{0} is already prescribed for this visit.").format(medicine))
 		submitted.add(medicine)
 
-		# 0 and None both mean the doctor left the box empty; a negative is a typo that would
-		# reach the pharmacy as a real number.
 		for label, value in ((_("Days"), row.get("duration_days")), (_("Quantity"), row.get("quantity"))):
 			if value is not None and flt(value) < 0:
 				frappe.throw(_("{0} cannot be negative.").format(label))
@@ -441,12 +429,7 @@ def get_patient_card_html(encounter: str) -> str:
 
 @frappe.whitelist()
 def get_referral_letter_html(encounter: str) -> str:
-	"""Render the printable referral letter for one encounter.
-
-	Referral is System Manager only in DocType permissions, so this crosses that boundary the
-	same way get_patient_card_html does on the CAD page: load_owned_encounter already proves
-	the caller may see this patient, and the print render carries only what that grants.
-	"""
+	"""Referral is System Manager only; load_owned_encounter is the access check here."""
 	require_doctor_access()
 	doc = load_owned_encounter(encounter)
 

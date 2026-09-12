@@ -180,9 +180,7 @@
 	justify-content: flex-end;
 }
 
-/* Not display:flex. This is a <td>, and a flex table cell drops out of the table's own row
-   sizing: on a row whose name wraps to two lines the cell stopped short of the row's bottom
-   and drew its border 17px above everyone else's. */
+/* Not flex: a flex <td> drops out of the table's row height. */
 .cad-dash .queue-row-actions {
 	text-align: right;
 	white-space: nowrap;
@@ -241,15 +239,10 @@
 	color: var(--text-muted);
 }
 
-/* Full Name, Native District and ABHA ID each render alone in a row of this 2-column grid
-   -- left at the default single cell, they leave the other column empty next to them. */
 .cad-dash .register-grid .field-wide {
 	grid-column: 1 / -1;
 }
 
-/* Sex, Country, Native State and Occupation/Sector all render as one of these — a row of
-   quick-tap tabs. Full width across the 2-column grid, since a 6-7 tab group (state, sector)
-   needs more room than a single grid cell gives it. */
 .cad-dash .tab-group-wrap {
 	grid-column: 1 / -1;
 }
@@ -265,20 +258,14 @@
 	min-width: 100px;
 }
 
-/* A chosen chip is a selection, not an action. It used to carry .btn-primary, which put a
-   second solid button on screen beside Register & Add to Queue -- and four of them once every
-   group had an answer. */
 .cad-dash .tab-btn.is-selected {
 	background: var(--gray-300);
-	/* Drawn as an inset shadow, not a border: these chips are auto-height, so a real 1px border
-	   would make the answered one 2px taller than the rest of its row. */
+	/* Inset shadow, not a border, so the chosen chip keeps its row height. */
 	box-shadow: inset 0 0 0 1px var(--gray-400);
 	color: var(--text-color);
 	font-weight: var(--weight-semibold);
 }
 
-/* Frappe hovers a .btn-default to the same gray-300 the answered chip sits on, which would
-   make a chip under the cursor read as answered. */
 .cad-dash .tab-btn:not(.is-selected):hover {
 	background: var(--gray-200);
 }
@@ -288,9 +275,7 @@
 	margin-top: 8px;
 }
 
-/* Bootstrap's `.form-control { display: block }` has the same specificity as the browser's
-   own `[hidden] { display: none }` rule and loads after it, so the `hidden` attribute alone
-   does not hide a `.form-control` — this makes sure it actually does. */
+/* .form-control sets display: block, which beats the hidden attribute. */
 .cad-dash .form-control[hidden] {
 	display: none !important;
 }
@@ -360,7 +345,6 @@
 		grid-template-columns: 1fr;
 	}
 
-	/* Three controls abreast leave the search field too narrow to read a scanned ID back. */
 	.cad-dash .search-row {
 		flex-wrap: wrap;
 	}

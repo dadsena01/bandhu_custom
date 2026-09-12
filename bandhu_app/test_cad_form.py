@@ -160,8 +160,6 @@ class IntegrationTestCadForm(IntegrationTestCase):
 			frappe.set_user("Administrator")
 
 		doc = frappe.get_doc("Patient", patient_name)
-		# Jan 1 of the birth year, not today's month/day minus 40 years — a migrant worker who
-		# only knows their age didn't just have a birthday today, so that would be a fake date.
 		self.assertEqual(str(doc.dob), f"{getdate().year - 40}-01-01")
 
 	def test_register_patient_prefers_explicit_dob_over_age(self):
@@ -556,8 +554,6 @@ class IntegrationTestCadForm(IntegrationTestCase):
 		self.assertEqual(match["name"], existing)
 
 	def test_find_possible_duplicate_matches_an_age_only_registration(self):
-		"""Age and an explicit DOB have to resolve to the same date, or a repeat registration
-		entered the same way as the first would not be recognised as one."""
 		frappe.set_user(self.cad_user)
 		try:
 			existing = register_patient(
@@ -599,8 +595,6 @@ class IntegrationTestCadForm(IntegrationTestCase):
 		self.assertTrue(row["queued_at"])
 
 	def test_registration_refuses_a_session_whose_lsg_has_no_number(self):
-		"""The unknown-LSG fallback exists for a patient registered with no session at all. Letting
-		it through here stamps "unknown location" into a permanent ID already printed on a card."""
 		location = frappe.db.get_value("Site", self.site, "location")
 		original = frappe.db.get_value("Bandhu Location", location, "lsg_numeric_code")
 		frappe.db.set_value("Bandhu Location", location, "lsg_numeric_code", "")
@@ -642,8 +636,6 @@ class IntegrationTestCadForm(IntegrationTestCase):
 			frappe.set_user("Administrator")
 
 	def test_today_queue_keeps_a_session_after_the_patient_attends_a_later_one(self):
-		"""Patient Queue holds one row per patient, overwritten every visit, so reading it made a
-		finished session lose any patient who came back to a later one."""
 		patient = self._make_patient("Test Two Session Patient")
 		later_session = self._make_session(self.cad_practitioner, self.doctor_practitioner)
 

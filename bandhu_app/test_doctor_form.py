@@ -299,8 +299,6 @@ class TestDoctorForm(IntegrationTestCase):
 		self.assertEqual(self.encounter.custom_chief_complaints, "Fever for 3 days")
 
 	def test_clearing_an_allergy_actually_clears_it(self):
-		"""A doctor emptying a wrongly recorded allergy sends an empty string. The old truthiness
-		check dropped that edit and left the wrong allergy on the record."""
 		frappe.set_user(self.doctor_user_1)
 		order_test(self.encounter.name, ["Malaria"], allergy_history="Penicillin")
 
@@ -324,8 +322,6 @@ class TestDoctorForm(IntegrationTestCase):
 			)
 
 	def test_prescribe_medicine_rejects_a_medicine_already_on_the_encounter(self):
-		"""The doctor prescribes, the patient goes to the nurse and comes back, and the same drug
-		is prescribed again -- two rows for whoever dispenses to read as two doses."""
 		frappe.set_user(self.doctor_user_1)
 		prescribe_medicine(self.encounter.name, [{"medicines": self.item, "quantity": 10}])
 
@@ -423,12 +419,6 @@ class TestDoctorForm(IntegrationTestCase):
 		self.assertIn("Suspected fracture", html)
 
 	def test_referral_letter_escapes_injected_referral_fields(self):
-		"""Jinja's print-format environment has autoescape off app-wide, so a field that reaches
-		the template unescaped is a stored-XSS hole for whoever prints the letter next. Frappe's
-		own base_document._sanitize_content already strips <script> and the onerror attribute on
-		save, so this checks the property that actually matters — no live script or event
-		handler reaches the output — rather than which layer (ORM sanitization or the template's
-		own `| e`) is the one that caught it."""
 		frappe.set_user(self.doctor_user_1)
 		complete_encounter(
 			self.encounter.name,

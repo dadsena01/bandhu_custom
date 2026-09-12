@@ -6,13 +6,12 @@ let cadSession = null;
 let cadPage = null;
 let formOptions = { major_states: [], other_states: [], major_sectors: [] };
 
-// India and Nepal are the quick taps; anything else is typed into the "specify" box.
 const QUICK_COUNTRIES = ["India", "Nepal"];
 
-// Keep in step with MAX_PLAUSIBLE_AGE in cad_form.py, which rejects anything above it.
+// Matches MAX_PLAUSIBLE_AGE in cad_form.py.
 const MAX_PLAUSIBLE_AGE = 120;
 
-// Keep in step with MIN_SEARCH_LENGTH in cad_form.py, which throws below it.
+// Matches MIN_SEARCH_LENGTH in cad_form.py.
 const MIN_SEARCH_LENGTH = 2;
 
 const NAME_FIELD = {
@@ -23,8 +22,6 @@ const NAME_FIELD = {
 	required: true,
 };
 
-// CMID asked for age to sit right after Sex, with DOB alongside it: a field CAD can fill
-// straight from what the patient tells them, without having to work out a birth date first.
 const AGE_AND_DOB_FIELDS = [
 	{
 		name: "age",
@@ -269,9 +266,6 @@ function renderRegisterSection() {
 	);
 }
 
-// Shared by every field label on this form — a plain field.required or config.required
-// flag, matching what register_patient (cad_form.py) actually enforces server-side, so the
-// mark is never a promise the backend doesn't keep.
 function requiredMark(required) {
 	return required ? ' <span class="required-mark">*</span>' : "";
 }
@@ -302,8 +296,6 @@ function renderFields(fields) {
 	return fields.map(renderField).join("");
 }
 
-// Age and DOB aren't each individually required (register_patient accepts either), so a
-// plain asterisk on one or both would overstate it -- this says the actual either/or rule.
 function renderFieldNote(text) {
 	return (
 		'<div class="form-group field-wide field-note">' +
@@ -312,10 +304,6 @@ function renderFieldNote(text) {
 	);
 }
 
-// A plain select, same as the Country/State "Other" picker -- populated once the state
-// above resolves a district list (loadDistrictSuggestions), disabled until then. A native
-// <datalist> used to back this field; the browser positions that popup itself with no CSS
-// hook, and CAD staff saw it land away from the field it belonged to.
 function renderDistrictField() {
 	return (
 		'<div class="form-group field-wide">' +
@@ -331,10 +319,6 @@ function renderDistrictField() {
 	);
 }
 
-// A picker select, hidden until its group's "Other" tab is tapped. Its own value flows into
-// the group's hidden field via the delegated change handler in bindRegisterEvents — the
-// select itself never carries the `cad-field` class, so submitRegistration never reads it
-// directly, only the value it forwarded.
 function renderOtherPicker(options, placeholderLabel) {
 	const optionHtml = options
 		.map(
@@ -356,14 +340,6 @@ function renderOtherPicker(options, placeholderLabel) {
 	);
 }
 
-// A row of quick-tap tab buttons backed by one hidden `cad-field` input, shared by Sex,
-// Country, Native State and Sector so the tab/reveal wiring exists exactly once.
-//
-// mode "direct": tapping a tab stores its own value straight into the hidden field — used
-// where every tab (including "Other") is itself a real, storable value.
-// mode "picker": tapping "Other" leaves the hidden field blank and reveals `otherPickerHtml`
-// instead, so the CAD chooses the real value from a full list rather than storing the
-// literal string "Other" — used where "Other" only means "not one of the common ones".
 function renderTabGroup(config) {
 	const buttons = config.options
 		.map((option) => {
@@ -411,8 +387,6 @@ function renderSexGroup() {
 	});
 }
 
-// "picker" mode with no picker: tapping Other clears the Link field and reveals the text box,
-// so a country outside the two quick taps is recorded without a typo ever reaching the Link.
 function renderCountryGroup() {
 	return renderTabGroup({
 		field: "native_country",
@@ -662,9 +636,6 @@ function renderSearchResults(page, results, capped) {
 
 	const rows = results
 		.map((patient) => {
-			// The Clinic ID is grouped the same way the queue below prints it, and the age is
-			// what a front desk can actually confirm with the patient -- a birth date on an
-			// estimated record is Jan 1 and confirms nothing.
 			const meta = [
 				bandhu.session_ui.group_clinic_id(patient.custom_bandhu_id),
 				patient.sex,
@@ -723,17 +694,11 @@ function bindRegisterEvents(page) {
 		.off("click", ".cad-register-toggle-btn")
 		.on("click", ".cad-register-toggle-btn", function () {
 			const form = page.main.find(".cad-register-form").toggle();
-			// Once the form is open its own Register button is the page's filled action, so the
-			// control that opened it drops back to being a plain collapse toggle.
 			$(this)
 				.toggleClass("btn-primary", !form.is(":visible"))
 				.toggleClass("btn-default", form.is(":visible"));
 		});
 
-	// Age fills the date of birth in on screen, using the same Jan 1 of the birth year that
-	// register_patient would have derived server-side, so CAD sees the date that gets stored
-	// instead of it appearing only after the patient is saved. A date CAD typed themselves is
-	// left alone: only a value this handler put there is overwritten or cleared.
 	page.main
 		.off("input", '.cad-field[data-field="age"]')
 		.on("input", '.cad-field[data-field="age"]', function () {
@@ -751,8 +716,6 @@ function bindRegisterEvents(page) {
 			dobField.val(derived).data("derived", derived);
 		});
 
-	// The other direction: a real birth date gives a real age, so CAD can read back what they
-	// entered without doing the arithmetic. Only an age this handler filled in is overwritten.
 	page.main
 		.off("input", '.cad-field[data-field="dob"]')
 		.on("input", '.cad-field[data-field="dob"]', function () {
@@ -769,8 +732,6 @@ function bindRegisterEvents(page) {
 			ageField.val(age).data("derived", String(age));
 		});
 
-	// One handler for all four tab groups (Sex, Country, Native State, Occupation/Sector):
-	// see renderTabGroup's comment for what "direct" vs "picker" mode means.
 	page.main.off("click", ".tab-btn").on("click", ".tab-btn", function () {
 		const wrap = $(this).closest(".tab-group-wrap");
 		wrap.find(".tab-btn").removeClass("is-selected");
@@ -792,8 +753,6 @@ function bindRegisterEvents(page) {
 			loadDistrictSuggestions(page, hiddenField.val());
 	});
 
-	// A picker's own change is what actually resolves the group's real value once "Other"
-	// revealed it — see renderOtherPicker.
 	page.main.off("change", ".other-picker").on("change", ".other-picker", function () {
 		const wrap = $(this).closest(".tab-group-wrap");
 		const hiddenField = wrap.find("input.cad-field");
@@ -808,9 +767,6 @@ function bindRegisterEvents(page) {
 		.on("click", ".cad-register-submit", () => submitRegistration(page));
 }
 
-// Every one of the 36 real states/UTs has a district list now (state_districts.py), so the
-// select just needs repopulating each time the state above changes -- no free-text fallback
-// path to keep in sync with it.
 async function loadDistrictSuggestions(page, state) {
 	const select = page.main.find(".district-select");
 	select
@@ -843,11 +799,8 @@ async function loadDistrictSuggestions(page, state) {
 	select.prop("disabled", false);
 }
 
-// Completed years between a yyyy-mm-dd birth date and today, or null if the date is unusable
-// (half-typed while the CAD is still on the year, or in the future).
 function years_since(date_string) {
-	// A date input always hands back yyyy-mm-dd, so this parses the parts rather than going
-	// through Date(), which would read the string as UTC and shift the day in IST.
+	// Parse the parts: Date() reads yyyy-mm-dd as UTC and shifts the day in IST.
 	const parts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date_string || "");
 	if (!parts) return null;
 
@@ -872,8 +825,7 @@ async function submitRegistration(page) {
 		frappe.msgprint(__("Full name is required."));
 		return;
 	}
-	// "" is falsy but a real age (0 for a newborn) is a legitimate way to skip DOB, so this
-	// checks presence rather than truthiness.
+	// 0 is a valid age for a newborn, so check presence, not truthiness.
 	const hasAge = values.age !== undefined && values.age !== "";
 	if (!values.dob && !hasAge) {
 		frappe.msgprint(__("Enter the date of birth, or an approximate age if it isn't known."));
@@ -933,9 +885,6 @@ async function submitRegistration(page) {
 	if (!patient) return;
 
 	await addPatientToQueue(page, patient, () => {
-		// Re-rendering, rather than clearing values in place, is what restores India as the
-		// default country tab and hides every group's revealed picker/detail field for the
-		// next patient.
 		page.main.find(".cad-register-form").hide().html(renderRegisterForm());
 		focus_scan_input(page);
 	});
@@ -946,9 +895,6 @@ async function submitRegistration(page) {
 	frappe.show_alert({ message: __("Patient registered."), indicator: "green" });
 }
 
-// A second registration for someone already on the master burns a permanent Clinic ID, prints
-// a second card, and splits that patient's history in two -- none of which can be undone once
-// the card is in the patient's hand.
 async function findPossibleDuplicate(args) {
 	const response = await frappe.call({
 		method: "bandhu_app.bandhu_app.page.cad_form.cad_form.find_possible_duplicate",
@@ -963,8 +909,6 @@ async function findPossibleDuplicate(args) {
 	return response.message;
 }
 
-// Resolves true to carry on and register a new patient, false to stop. Queueing the existing
-// patient stops the registration too, having already done the thing the CAD actually wanted.
 function confirmRegisterAnyway(page, existing) {
 	return new Promise((resolve) => {
 		const label = [
@@ -1107,15 +1051,10 @@ function renderRowMenu(row) {
 	);
 }
 
-// Time since the patient registered, not time spent waiting: no state change is timestamped, and
-// a patient who is with the nurse is not waiting for anything. How long someone has been in the
-// session is what the front desk is asked for anyway. Finished visits drop it.
 function format_time_in_session(row) {
 	if (!row.queued_at || QUEUE_TERMINAL_STAGES.has(row.current_stage)) return "";
 
-	// comment_when returns the framework's own <span class="frappe-timestamp">, so this string
-	// is markup on purpose -- escaping it prints the tag.
-	// The column heading already says what this is, so the cell is just the duration.
+	// comment_when returns markup, so it is not escaped.
 	return frappe.datetime.comment_when(row.queued_at, true);
 }
 
@@ -1163,8 +1102,7 @@ async function refreshBoard() {
 	bandhu.session_ui.add_refresh_icon(cadPage, refreshBoard);
 	const load = cadPage.main.find(".cad-queue-body").length ? loadQueue : loadDashboard;
 	await bandhu.session_ui.refresh_page(cadPage, load);
-	// After the load, not before: the session's room can only be joined once the page knows which
-	// session it is showing.
+	// Join the session room only after the load says which session this is.
 	bandhu.session_ui.subscribe_to_board_updates(
 		"cad-form",
 		() => (cadSession ? cadSession.session_name : null),

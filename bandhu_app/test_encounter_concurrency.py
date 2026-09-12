@@ -213,7 +213,6 @@ class TestEncounterConcurrency(IntegrationTestCase):
 		self.assertEqual(stored.custom_bandhu_prescription[0].dispensed, 1)
 
 	def test_a_stale_nurse_request_cannot_reopen_a_session_the_first_one_closed(self):
-		"""Two nurses on the session controls: the loser must not resurrect a closed session."""
 		frappe.set_user(self.nurse_user)
 		first_read = nurse_form.load_session_for_status_change(self.session)
 		self.assertEqual(first_read.status, "In Progress")

@@ -1,8 +1,5 @@
 import frappe
 
-# custom_lsg, custom_district and custom_state on Patient Encounter all fetch from
-# custom_location, and nothing had ever set that link -- so every visit recorded before this
-# patch carries three empty fields the scope of work asks the software to capture by itself.
 LOCATION_FIELDS = ("lsg", "district", "state")
 
 
@@ -47,8 +44,7 @@ def execute():
 		if not details:
 			continue
 
-		# db.set_value, not a save: these are historical visits, some of them completed, and
-		# re-saving would re-run the workflow hooks on records nobody is touching.
+		# db.set_value, not save, so completed visits do not re-run workflow hooks.
 		frappe.db.set_value(
 			"Patient Encounter",
 			row.name,

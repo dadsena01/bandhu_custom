@@ -6,8 +6,7 @@ from frappe.utils import validate_email_address, validate_phone_number
 
 PROVISIONABLE_ROLES = ["Doctor", "Nurse", "Clinic Assistant cum Driver"]
 
-# Gender only ships pre-seeded via the setup wizard, which a `bench new-site` +
-# `install-app` site never runs — seed_default_genders() covers that.
+# Gender records come from the setup wizard, which a bench-created site never runs.
 OFFERED_GENDERS = ["Male", "Female", "Other"]
 
 
@@ -109,9 +108,6 @@ def provision_staff_member(
 
 @frappe.whitelist(methods=["POST"])
 def save_staff_documents(user: str, documents: list | str) -> int:
-	"""Documents live on the User, which is where an admin looks a person up and where the files
-	show in the standard Attachments sidebar. Named by whoever uploads them, so the record says
-	what each file is rather than carrying a row of camera filenames."""
 	require_system_manager()
 
 	if not frappe.db.exists("User", user):

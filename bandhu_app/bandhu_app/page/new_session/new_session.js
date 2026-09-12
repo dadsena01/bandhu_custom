@@ -5,8 +5,6 @@ const SESSION_UI_ASSET = "/assets/bandhu_app/js/session_ui.js";
 let options = {};
 let session = {};
 
-// No recorded history for a key is "nothing has run there yet", not "nothing is valid" —
-// an empty or missing map entry must fall through to the full list, never to zero options.
 function filteredByHistory(list, historyMap, key) {
 	if (!key) return list;
 	const allowed = (historyMap || {})[key];
@@ -83,9 +81,6 @@ function inputField(field, label, type, required) {
 }
 
 function renderWhere() {
-	// Hierarchy is Project > Site > Clinic > Unit: each field narrows the ones below it to
-	// what has actually been run together before (see filteredByHistory), and Clinic is
-	// additionally hard-filtered by Project since Clinic.project is a real schema link.
 	const associations = options.associations || {};
 	const sites = filteredByHistory(options.sites, associations.project_sites, session.project);
 
@@ -187,9 +182,6 @@ function bind(page) {
 	page.main.on("change", ".new-session-field", function () {
 		const field = $(this).data("field");
 		applyFieldChange(field, $(this).val());
-		// Project/Site/Clinic sit above other fields in the hierarchy and narrow their
-		// options, so they need an immediate repaint; anything else can render lazily once
-		// the clash check comes back.
 		if (["project", "site", "clinic"].includes(field)) {
 			render(page);
 		}
@@ -200,7 +192,6 @@ function bind(page) {
 function applyFieldChange(field, value) {
 	session[field] = value;
 
-	// Clinic is the only master that already knows its project and vehicle.
 	if (field === "clinic") {
 		const clinic = (options.clinics || []).find((item) => item.value === value);
 		if (clinic) {
@@ -209,8 +200,6 @@ function applyFieldChange(field, value) {
 		}
 	}
 
-	// Project and Site sit above Clinic and Unit in the hierarchy — a value the field
-	// below no longer offers must be cleared, not left selected but invisible.
 	const associations = options.associations || {};
 	if (field === "project") {
 		const clinic = (options.clinics || []).find((item) => item.value === session.clinic);
@@ -253,7 +242,6 @@ async function loadClashes(page) {
 		});
 		clashes = (response && response.message) || [];
 	} catch (error) {
-		// The clash warning is guidance; losing it must not block the form.
 		return;
 	}
 	render(page, clashes);
@@ -319,8 +307,7 @@ frappe.pages["new-session"].on_page_load = function (wrapper) {
 		render(page);
 	});
 
-	// No on_page_show reload here: this page holds a half-filled form, and re-running the
-	// load on every return would throw away whatever the admin had already entered.
+	// No on_page_show reload: it would wipe a half-filled form.
 	(async () => {
 		await frappe.require(SESSION_UI_ASSET);
 		await bandhu.session_ui.refresh_page(page, loadOptions);

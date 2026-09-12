@@ -20,8 +20,6 @@ function allergyHistoryOf(encounter) {
 	return (encountersByName[encounter] || {}).custom_allergy_history || "";
 }
 
-// One call for the whole queue. Fetching per patient meant a 40-patient session fired 40 parallel
-// requests, saturating the browser connection pool on a weak link.
 async function getPatientHistories(patients) {
 	if (!patients.length) return {};
 	const response = await frappe.call({
@@ -110,17 +108,12 @@ async function loadQueues(page) {
 	renderDashboard(page, active, completed);
 }
 
-// Up to MAX_PATIENTS_WITH_DOCTOR (doctor_form.py) can be called in at once, oldest call first
-// so the person who has been sitting there longest stays at the top of the page.
 function splitQueues(active) {
 	const inRoom = active
 		.filter((encounter) => encounter.custom_called_at)
 		.sort((one, other) => (one.custom_called_at < other.custom_called_at ? -1 : 1));
 	const waiting = active.filter((encounter) => !encounter.custom_called_at);
 
-	// A patient back from the nurse has already been seen once and is minutes from leaving, so
-	// they go above people who have not been called yet; the nurse's own queue sits last because
-	// nothing on it is the doctor's to act on.
 	waiting.sort((one, other) => {
 		const rank = (encounter) => WAITING_ORDER[encounter.custom_workflow_state] ?? 3;
 		return rank(one) - rank(other) || (one.creation < other.creation ? -1 : 1);
@@ -239,8 +232,6 @@ async function getTestOptions() {
 	return testOptions;
 }
 
-// The three notes were the first thing in every dialog, pushing the tests checklist and the
-// medicines table below the fold. They belong under the work, in one collapsed group.
 function historyFields(encounter) {
 	return [
 		{ fieldtype: "Section Break", label: __("History"), collapsible: 1 },
@@ -265,8 +256,6 @@ function historyFields(encounter) {
 	];
 }
 
-// A recorded allergy is the one thing on this page that must not be scrolled past while a drug
-// is being chosen, so it leads the dialog instead of sitting third in a column of grey boxes.
 function allergyWarningFields(encounter) {
 	const allergy = allergyHistoryOf(encounter);
 	if (!allergy) return [];
@@ -372,8 +361,6 @@ function openPrescribeDialog(page, encounter) {
 						label: __("Instructions"),
 					},
 				],
-				// One row already there: the dialog is named for this table, and an empty grid
-				// made every prescription start with a hunt for Add row.
 				data: [{}],
 			},
 			...historyFields(encounter),
@@ -484,8 +471,6 @@ async function submitDoctorAction(page, method, args, alertMessage = __("Saved")
 	await bandhu.session_ui.refresh_page(page, loadQueues);
 }
 
-// Where a patient sits when they are not with the doctor. The doctor's own two queues rank
-// first; the nurse's queue is shown so the doctor can see the whole session, but not acted on.
 const WAITING_ORDER = {
 	"Awaiting Doctor Review": 0,
 	"Waiting for Doctor": 1,
@@ -499,8 +484,6 @@ const WAITING_NOTES = {
 	"Awaiting Doctor Review": __("back from nurse"),
 };
 
-// Nothing here is filled. Calling the next patient is the board's one primary action, and a
-// Mark Complete on every room card would put two or four blue buttons on the same screen.
 function renderRoomActions(encounter) {
 	const buttons = [];
 
@@ -582,9 +565,7 @@ async function printPatientCard(encounter) {
 	);
 }
 
-// Referral is System Manager only in DocType permissions, same reason cad_form.js cannot use
-// /printview for the patient card — the letter comes back through this page's own gated
-// endpoint instead.
+// Referral is System Manager only, so the letter comes from a gated endpoint, not /printview.
 async function printReferralLetter(encounter) {
 	await printThroughEndpoint(
 		"get_referral_letter_html",
@@ -717,7 +698,6 @@ function renderHistoryList(encounter) {
 	return '<ul class="history-list">' + items + "</ul>";
 }
 
-// Only shown once a session is big enough for scrolling to be the problem it solves.
 const FILTER_BAR_MIN_PATIENTS = 8;
 
 function renderFilterBar(patientCount) {
@@ -738,8 +718,6 @@ function applyQueueFilter(page) {
 
 	page.main.find(".queue-section").each(function () {
 		const section = $(this);
-		// "With you" holds room cards, not rows. The patient in the room is the one being worked
-		// on, so the filter neither hides them nor rewrites that heading's count.
 		if (!section.find(".queue-row").length) return;
 
 		let shown = 0;
@@ -750,8 +728,6 @@ function applyQueueFilter(page) {
 			if (matches) shown += 1;
 		});
 
-		// The heading keeps the section's real total and says how much of it is on screen, so a
-		// filtered board never reads as a shorter queue than it is.
 		const count = section.find(".section-count");
 		const total = count.data("total") ?? count.text();
 		count.data("total", total);
@@ -801,7 +777,6 @@ function renderRoomSection(inRoom, waiting) {
 	);
 }
 
-// The way to bring the next person in, whether the room is empty or already holds two.
 function renderCallStrip(inRoom, waiting) {
 	const callable = waiting.filter(isCallable);
 	const full = inRoom.length >= MAX_PATIENTS_WITH_DOCTOR;
@@ -870,8 +845,6 @@ function renderRoomCard(encounter) {
 	);
 }
 
-// On the card as well as in the dialogs: by the time the prescribe dialog is open the doctor
-// has already decided what to give.
 function renderAllergy(encounter) {
 	if (!encounter.custom_allergy_history) return "";
 
@@ -1001,8 +974,6 @@ function renderDoneRow(encounter) {
 	);
 }
 
-// An empty list is a fact in passing, not a panel: the boxed empty state took as much of the
-// screen as a queue of four and pushed the real work off the top.
 function renderEmptyList(message) {
 	return '<div class="queue-empty">' + frappe.utils.escape_html(message) + "</div>";
 }
@@ -1014,8 +985,6 @@ frappe.pages["doctor-form"].on_page_load = function (wrapper) {
 		single_column: true,
 	});
 
-	// The one filled button on this page brings in the next patient, so leaving the page is a
-	// secondary action -- the same header the CAD and Nurse boards carry.
 	page.set_secondary_action(
 		__("My Schedule"),
 		() => frappe.set_route("my-schedule"),
@@ -1029,8 +998,7 @@ async function refreshDashboard() {
 	await frappe.require(SESSION_UI_ASSET);
 	bandhu.session_ui.add_refresh_icon(doctorPage, refreshDashboard);
 	await bandhu.session_ui.refresh_page(doctorPage, loadDashboard);
-	// After the load, not before: the session's room can only be joined once the page knows which
-	// session it is showing.
+	// Join the session room only after the load says which session this is.
 	bandhu.session_ui.subscribe_to_board_updates(
 		"doctor-form",
 		() => (doctorSession ? doctorSession.session_name : null),

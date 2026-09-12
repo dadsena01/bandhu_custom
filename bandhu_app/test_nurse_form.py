@@ -173,8 +173,6 @@ class IntegrationTestNurseForm(IntegrationTestCase):
 		)
 
 	def test_submit_test_results_rejects_a_test_left_blank(self):
-		"""A blank result advanced the patient anyway, putting an ordered test in front of the
-		doctor marked reviewed and carrying nothing."""
 		encounter = self._make_encounter(self.session, "Awaiting Test", tests=[{"test_name": "Malaria"}])
 		row_name = encounter.custom_test_instructions[0].name
 
@@ -193,8 +191,6 @@ class IntegrationTestNurseForm(IntegrationTestCase):
 		self.assertEqual(encounter.custom_workflow_state, "Awaiting Test")
 
 	def test_submit_test_results_accepts_not_done_as_an_answer(self):
-		"""The escape hatch that makes the blank check safe: a nurse who cannot run a test says
-		so, instead of picking Positive or Negative to get past the form."""
 		encounter = self._make_encounter(self.session, "Awaiting Test", tests=[{"test_name": "Malaria"}])
 		row_name = encounter.custom_test_instructions[0].name
 
@@ -234,7 +230,6 @@ class IntegrationTestNurseForm(IntegrationTestCase):
 			frappe.set_user("Administrator")
 
 	def test_record_vitals_rejects_half_a_blood_pressure(self):
-		"""Only one of the two numbers used to be dropped without a word."""
 		encounter = self._make_encounter(self.session, "Awaiting Test")
 
 		frappe.set_user(self.nurse_user)
@@ -296,7 +291,6 @@ class IntegrationTestNurseForm(IntegrationTestCase):
 		self.assertEqual(flt(encounter.custom_weight), 68)
 		self.assertEqual(encounter.custom_blood_pressure, "120/80")
 		self.assertEqual(flt(encounter.custom_bmi), 23.53)
-		# The workflow state is untouched: recording vitals is not a queue transition.
 		self.assertEqual(encounter.custom_workflow_state, "Awaiting Test")
 
 	def test_record_vitals_rejects_empty_call(self):
