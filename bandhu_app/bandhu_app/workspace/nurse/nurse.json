@@ -1,7 +1,7 @@
 {
- "app": "frappe",
+ "app": "bandhu_app",
  "charts": [],
- "content": "[{\"id\":\"2OiP63Lh2T\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h2\\\">Nurse</span>\",\"col\":12}},{\"id\":\"41QkXylKHI\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"WqSFn7qNu4\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\ud83d\udc8a Medication Dispense\",\"col\":6}},{\"id\":\"s78Ti0SWr4\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\ud83d\udcc3 Test Result\",\"col\":6}}]",
+ "content": "[{\"id\":\"2OiP63Lh2T\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h2\\\">Nurse</span>\",\"col\":12}},{\"id\":\"41QkXylKHI\",\"type\":\"spacer\",\"data\":{\"col\":12}}]",
  "creation": "2026-04-27 17:58:16.212862",
  "custom_blocks": [],
  "docstatus": 0,
@@ -33,24 +33,7 @@
   }
  ],
  "sequence_id": 31.0,
- "shortcuts": [
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "\ud83d\udc8a Medication Dispense",
-   "link_to": "Bandhu Medication Dispense",
-   "stats_filter": "[]",
-   "type": "DocType"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "\ud83d\udcc3 Test Result",
-   "link_to": "Test Result",
-   "stats_filter": "[]",
-   "type": "DocType"
-  }
- ],
+ "shortcuts": [],
  "title": "Nurse",
  "type": "Workspace"
 }

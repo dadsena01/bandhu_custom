@@ -1,12 +1,18 @@
 import frappe
-from frappe import _
-from frappe.utils import add_days, today
+from frappe.utils import add_days, getdate, today
 
 from bandhu_app.bandhu_app.utils.session_schedule import (
+	ACCEPTED_FIELDS,
 	PREVIEW_LIMIT,
+	WEEKDAYS,
+	as_draft,
+	association_maps,
+	clock_value,
 	find_assignment_clashes,
 	horizon_days,
 	occurrence_dates,
+	practitioners_by_role,
+	require_scheduling_access,
 )
 
 FREQUENCY_CHOICES = [
@@ -15,73 +21,12 @@ FREQUENCY_CHOICES = [
 	{"value": "Monthly", "label": "Once a month"},
 ]
 
-WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 
 PRACTITIONER_FIELD_BY_ROLE = {
 	"assigned_doctor": "Doctor",
 	"assigned_nurse": "Nurse",
 	"assigned_driver": "Clinic Assistant cum Driver",
 }
-
-
-def require_scheduling_access() -> None:
-	if "System Manager" not in frappe.get_roles():
-		frappe.throw(
-			_("You do not have permission to create clinic schedules."),
-			frappe.PermissionError,
-		)
-
-
-def practitioners_by_role(custom_role: str) -> list:
-	return frappe.get_all(
-		"Healthcare Practitioner",
-		filters={"custom_role": custom_role, "status": "Active"},
-		fields=["name as value", "practitioner_name as label"],
-		order_by="practitioner_name asc",
-	)
-
-
-ACCEPTED_FIELDS = (
-	"site",
-	"clinic",
-	"project",
-	"unit",
-	"vehicle",
-	"frequency",
-	"monthly_mode",
-	"week_of_month",
-	"day_of_month",
-	"planned_start_time",
-	"planned_end_time",
-	"valid_from",
-	"valid_upto",
-	"holiday_list",
-	"assigned_doctor",
-	"assigned_nurse",
-	"assigned_driver",
-)
-
-
-def as_draft(values) -> "frappe.model.document.Document":
-	"""Turn the wizard's payload into an unsaved schedule so the same date maths and
-	clash check serve the preview and the real save."""
-	values = frappe.parse_json(values) or {}
-	weekdays = values.get("weekdays") or []
-
-	draft = frappe.new_doc("Bandhu Session Schedule")
-	# Only the wizard's own fields are copied: passing the whole payload to update() let a
-	# caller set name, owner or last_generated_upto.
-	draft.update(
-		{
-			field: values[field]
-			for field in ACCEPTED_FIELDS
-			if values.get(field) not in (None, "")
-		}
-	)
-	for weekday in weekdays:
-		if weekday in WEEKDAYS:
-			draft.append("weekdays", {"weekday": weekday})
-	return draft
 
 
 @frappe.whitelist()
@@ -104,16 +49,8 @@ def get_form_options() -> dict:
 		"frequencies": FREQUENCY_CHOICES,
 		"weekdays": WEEKDAYS,
 		"defaults": last_used_defaults(),
+		"associations": association_maps(),
 	}
-
-
-def clock_value(value, fallback: str) -> str:
-	"""`<input type="time">` silently renders empty unless the value is zero-padded, and
-	Frappe hands a Time back as `9:30:00`."""
-	if value in (None, ""):
-		return fallback
-	hours, minutes, seconds = (str(value).split(":") + ["00", "00"])[:3]
-	return f"{int(hours):02d}:{minutes:0>2}:{seconds[:2]:0>2}"
 
 
 def last_used_defaults() -> dict:
@@ -144,20 +81,31 @@ def preview_schedule(values: str) -> dict:
 		draft.valid_from = today()
 
 	dates = occurrence_dates(draft, today(), add_days(today(), horizon_days()))
+	four_weeks_out = getdate(add_days(today(), 28))
+
 	return {
-		"dates": [str(day) for day in dates[:PREVIEW_LIMIT]],
+		# Every date the pattern produces — the panel scrolls, so there is nothing to gain by
+		# hiding them. Clash lookup stays capped: it is a query per date, the dates are not.
+		"dates": [str(day) for day in dates],
 		"total": len(dates),
 		"clashes": find_assignment_clashes(draft, dates[:PREVIEW_LIMIT]),
+		"next_4_weeks": [str(day) for day in dates if day <= four_weeks_out],
 	}
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def create_schedule(values: str) -> dict:
 	require_scheduling_access()
 
 	draft = as_draft(values)
 	draft.enabled = 1
+	# The Who step has already shown these clashes and the user pressed Create anyway; the form's
+	# own warning would only repeat them in a modal.
+	draft.flags.clashes_already_shown = True
 	draft.insert()
 
-	created = frappe.db.count("Bandhu Clinic Session", {"session_schedule": draft.name})
-	return {"name": draft.name, "created": created}
+	# The camps themselves are built by a background job, so counting rows here would report
+	# zero. The pattern is what the wizard can promise: a new schedule owns none of its dates
+	# yet, so every occurrence in the horizon becomes a camp.
+	scheduled = occurrence_dates(draft, today(), add_days(today(), horizon_days()))
+	return {"name": draft.name, "scheduled": len(scheduled)}

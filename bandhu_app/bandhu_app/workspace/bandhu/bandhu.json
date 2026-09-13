@@ -1,7 +1,7 @@
 {
  "app": "bandhu_app",
  "charts": [],
- "content": "[{\"id\":\"OUoNwjaC2h\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h2\\\">Bandhu Clinic Operations</span>\",\"col\":12}},{\"id\":\"W9E_i2W2pw\",\"type\":\"paragraph\",\"data\":{\"text\":\"Hi, welcome. Let's start the clinic session:&nbsp;\",\"col\":12}},{\"id\":\"7wIG3PkFpW\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\ud83e\uddd1\ud83c\udffb\u200d\u2695\ufe0fClinic\",\"col\":6}},{\"id\":\"uhR29saJao\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\ud83d\udcdd Start Clinic Session \",\"col\":6}},{\"id\":\"WHiIVWTp-B\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\ud83e\ude7a Start Consultation\",\"col\":6}},{\"id\":\"6lAS5pb0vk\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\ud83d\udccb Patient Queue\",\"col\":4}},{\"id\":\"hxK2X54IX2\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Staff Log \u26d1\ufe0f\",\"col\":4}},{\"id\":\"od5KkK2DdZ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Assign Units\",\"col\":4}},{\"id\":\"DVlJ5DWGV9\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"qZGJlWWSAu\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h2\\\">Clinic Assistant cum Driver</span>\",\"col\":12}},{\"id\":\"p2SVoIVsnN\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Vehicle log\",\"col\":4}},{\"id\":\"DB49k0jxHD\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Vehicle Refuel Log\",\"col\":4}},{\"id\":\"Sn7-BmiRM2\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Vehicle Usage Log\",\"col\":4}},{\"id\":\"4yF2A_6hdx\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"g0sKZTgmPc\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"GMZ4AGYfZf\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"nBMMfVmJv9\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Patients\",\"col\":12}}]",
+ "content": "[{\"id\":\"OUoNwjaC2h\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h2\\\">Bandhu Clinic Operations</span>\",\"col\":12}},{\"id\":\"W9E_i2W2pw\",\"type\":\"paragraph\",\"data\":{\"text\":\"Hi, welcome. Let's start the clinic session:&nbsp;\",\"col\":12}},{\"id\":\"7wIG3PkFpW\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\ud83e\uddd1\ud83c\udffb\u200d\u2695\ufe0fClinic\",\"col\":6}},{\"id\":\"uhR29saJao\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\ud83d\udcdd Clinic Sessions\",\"col\":6}},{\"id\":\"WHiIVWTp-B\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\ud83e\ude7a Start Consultation\",\"col\":6}},{\"id\":\"6lAS5pb0vk\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"\ud83d\udccb Patient Queue\",\"col\":4}},{\"id\":\"od5KkK2DdZ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Assign Units\",\"col\":4}},{\"id\":\"DVlJ5DWGV9\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"qZGJlWWSAu\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h2\\\">Clinic Assistant cum Driver</span>\",\"col\":12}},{\"id\":\"p2SVoIVsnN\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Vehicles\",\"col\":4}},{\"id\":\"DB49k0jxHD\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Vehicle Refuel Log\",\"col\":4}},{\"id\":\"Sn7-BmiRM2\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Vehicle Usage Log\",\"col\":4}},{\"id\":\"4yF2A_6hdx\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"g0sKZTgmPc\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"GMZ4AGYfZf\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"nBMMfVmJv9\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Patients\",\"col\":12}}]",
  "creation": "2026-04-15 12:39:03.722813",
  "custom_blocks": [],
  "docstatus": 0,
@@ -33,11 +33,10 @@
  "shortcuts": [
   {
    "color": "Grey",
-   "doc_view": "New",
+   "doc_view": "",
    "label": "\ud83e\ude7a Start Consultation",
-   "link_to": "Patient Encounter",
-   "stats_filter": "[]",
-   "type": "DocType"
+   "link_to": "cad-form",
+   "type": "Page"
   },
   {
    "color": "Grey",
@@ -66,15 +65,7 @@
   {
    "color": "Grey",
    "doc_view": "List",
-   "label": "Staff Log \u26d1\ufe0f",
-   "link_to": "Staff Log",
-   "stats_filter": "[]",
-   "type": "DocType"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "Vehicle log",
+   "label": "Vehicles",
    "link_to": "Vehicle",
    "stats_filter": "[]",
    "type": "DocType"
@@ -82,7 +73,7 @@
   {
    "color": "Grey",
    "doc_view": "List",
-   "label": "\ud83d\udcdd Start Clinic Session ",
+   "label": "\ud83d\udcdd Clinic Sessions",
    "link_to": "Bandhu Clinic Session",
    "stats_filter": "[]",
    "type": "DocType"

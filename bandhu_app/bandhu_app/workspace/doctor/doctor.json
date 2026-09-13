@@ -1,5 +1,5 @@
 {
- "app": "frappe",
+ "app": "bandhu_app",
  "charts": [],
  "content": "[{\"id\":\"grZMA4YJzB\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h2\\\">Doctor</span>\",\"col\":12}},{\"id\":\"knKIJUXN8H\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"8UoS4UNe0S\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"Mvu2SsraTF\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Patient\",\"col\":12}},{\"id\":\"nINvG-PmTJ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Patient Queue\",\"col\":12}},{\"id\":\"ti00prfKhd\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Referral\",\"col\":12}}]",
  "creation": "2026-04-20 17:44:47.583251",
@@ -38,7 +38,7 @@
    "color": "Grey",
    "doc_view": "List",
    "label": "Patient Queue",
-   "link_to": "Patient Encounter",
+   "link_to": "Patient Queue",
    "stats_filter": "[]",
    "type": "DocType"
   },

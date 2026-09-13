@@ -1,0 +1,106 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:test_name",
+ "creation": "2026-08-26 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "test_name",
+  "enabled",
+  "column_break_shape",
+  "result_shape",
+  "unit",
+  "display_order"
+ ],
+ "fields": [
+  {
+   "fieldname": "test_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Test Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Enabled"
+  },
+  {
+   "fieldname": "column_break_shape",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Positive / Negative",
+   "description": "Decides what the nurse is asked for: a Positive/Negative verdict, or a measured value.",
+   "fieldname": "result_shape",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Result Shape",
+   "options": "Positive / Negative\nValue",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.result_shape == \"Value\"",
+   "fieldname": "unit",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Unit",
+   "mandatory_depends_on": "eval:doc.result_shape == \"Value\""
+  },
+  {
+   "default": "0",
+   "description": "Lower numbers appear first on the doctor's order-test grid.",
+   "fieldname": "display_order",
+   "fieldtype": "Int",
+   "label": "Display Order"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-08-26 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Bandhu App",
+ "name": "Bandhu Test",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Doctor"
+  },
+  {
+   "read": 1,
+   "role": "Nurse"
+  },
+  {
+   "read": 1,
+   "role": "Programme Manager"
+  },
+  {
+   "read": 1,
+   "role": "Director"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "display_order",
+ "sort_order": "ASC",
+ "states": [],
+ "track_changes": 1
+}

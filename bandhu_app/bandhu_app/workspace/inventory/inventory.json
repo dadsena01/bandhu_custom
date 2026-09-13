@@ -1,7 +1,7 @@
 {
- "app": "frappe",
+ "app": "bandhu_app",
  "charts": [],
- "content": "[{\"id\":\"fzKWYz8m01\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h2\\\">Inventory</span>\",\"col\":12}},{\"id\":\"9O1ffjXXP4\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"OvQ6U4miAX\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Asset\",\"col\":4}},{\"id\":\"xIhCvR8PXo\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Asset Movement\",\"col\":4}},{\"id\":\"jbtCET1Qjv\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Asset Repair\",\"col\":4}}]",
+ "content": "[{\"id\":\"fzKWYz8m01\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h2\\\">Inventory</span>\",\"col\":12}},{\"id\":\"9O1ffjXXP4\",\"type\":\"spacer\",\"data\":{\"col\":12}}]",
  "creation": "2026-04-22 07:22:15.397367",
  "custom_blocks": [],
  "docstatus": 0,
@@ -30,32 +30,7 @@
   }
  ],
  "sequence_id": 29.0,
- "shortcuts": [
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "Asset",
-   "link_to": "Asset",
-   "stats_filter": "[]",
-   "type": "DocType"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "Asset Movement",
-   "link_to": "Asset Movement",
-   "stats_filter": "[]",
-   "type": "DocType"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "Asset Repair",
-   "link_to": "Asset Repair",
-   "stats_filter": "[]",
-   "type": "DocType"
-  }
- ],
+ "shortcuts": [],
  "title": "Inventory",
  "type": "Workspace"
 }

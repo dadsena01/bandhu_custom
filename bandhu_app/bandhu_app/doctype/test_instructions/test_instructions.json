@@ -21,10 +21,10 @@
   },
   {
    "fieldname": "test_name",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Test Name",
-   "options": "Malaria\nDengue\nLeptospirosis\nHb\nGRBS",
+   "options": "Bandhu Test",
    "permlevel": 1
   },
   {

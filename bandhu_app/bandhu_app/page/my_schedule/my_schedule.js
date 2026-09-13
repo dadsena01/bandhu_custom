@@ -1,20 +1,8 @@
-function formatClockTime(value) {
-	if (!value) return "";
-	// A Time field arrives as "9:30:00", not "09:30:00", so it cannot simply be truncated.
-	const [hours, minutes] = String(value).split(":");
-	const hour = parseInt(hours, 10);
-	const suffix = hour < 12 ? "AM" : "PM";
-	const hour12 = hour % 12 === 0 ? 12 : hour % 12;
-	return hour12 + ":" + (minutes || "00").padStart(2, "0") + " " + suffix;
-}
+/* global bandhu */
 
-function formatTimeWindow(session) {
-	if (!session.planned_start_time) return __("Time not set");
-	const start = formatClockTime(session.planned_start_time);
-	return session.planned_end_time
-		? start + " – " + formatClockTime(session.planned_end_time)
-		: start;
-}
+const SESSION_UI_ASSET = "/assets/bandhu_app/js/session_ui.js";
+
+let schedulePage = null;
 
 function daysFromToday(date) {
 	return moment(date).startOf("day").diff(moment().startOf("day"), "days");
@@ -34,12 +22,32 @@ function joinParts(parts) {
 }
 
 function renderDetail(session) {
-	const lines = [
-		[__("Site"), session.site],
-		[__("Area"), session.location],
-		[__("LSG"), session.lsg],
-		[__("District"), joinParts([session.district, session.state])],
-		[__("Nearest PHC / CHC"), session.phcchc],
+	// The three questions this row is opened to answer, in that order: where am I going, what is
+	// coming with me, who is with me. Area/LSG/district are context for the site, not three facts
+	// to be read one at a time, so they collapse into one muted line beneath it.
+	const place =
+		'<div class="detail-place"><div class="detail-site">' +
+		frappe.utils.icon("map-pin", "sm", "", "", "current-color detail-site-icon") +
+		frappe.utils.escape_html(session.site || "") +
+		"</div>" +
+		(joinParts([session.location, session.lsg, session.district, session.state])
+			? '<div class="detail-where">' +
+			  frappe.utils.escape_html(
+					joinParts([session.location, session.lsg, session.district, session.state])
+			  ) +
+			  "</div>"
+			: "") +
+		// A referral destination, not part of the camp's identity — present, never competing.
+		(session.phcchc
+			? '<div class="detail-aside">' +
+			  __("Nearest PHC / CHC") +
+			  ": " +
+			  frappe.utils.escape_html(session.phcchc) +
+			  "</div>"
+			: "") +
+		"</div>";
+
+	const kit = [
 		[__("Clinic"), session.clinic],
 		[__("Unit"), session.unit],
 		[__("Vehicle"), session.vehicle],
@@ -58,9 +66,10 @@ function renderDetail(session) {
 	const team = (session.team || [])
 		.map((member) => {
 			const contact = member.mobile
-				? '<a href="tel:' +
+				? '<a class="detail-call" href="tel:' +
 				  encodeURIComponent(member.mobile) +
 				  '">' +
+				  frappe.utils.icon("phone", "xs", "", "", "current-color detail-call-icon") +
 				  frappe.utils.escape_html(member.mobile) +
 				  "</a>"
 				: '<span class="no-contact">' + __("No number on record") + "</span>";
@@ -78,8 +87,21 @@ function renderDetail(session) {
 
 	return (
 		'<div class="sched-detail">' +
-		lines +
-		(team ? '<div class="detail-head">' + __("Team that day") + "</div>" + team : "") +
+		place +
+		(kit
+			? '<div class="detail-group"><div class="detail-head">' +
+			  __("Clinic and vehicle") +
+			  "</div>" +
+			  kit +
+			  "</div>"
+			: "") +
+		(team
+			? '<div class="detail-group"><div class="detail-head">' +
+			  __("Team that day") +
+			  "</div>" +
+			  team +
+			  "</div>"
+			: "") +
 		"</div>"
 	);
 }
@@ -88,14 +110,24 @@ function renderCard(session) {
 	const days = daysFromToday(session.date);
 	const isCancelled = session.status === "Cancelled";
 	const badge = isCancelled
-		? '<span class="sched-badge cancelled">' + __("Cancelled — do not travel") + "</span>"
+		? '<span class="sched-badge cancelled">' +
+		  frappe.utils.icon("triangle-alert", "xs", "", "", "current-color sched-badge-icon") +
+		  __("Cancelled — do not travel") +
+		  "</span>"
 		: days === 0
 		? '<span class="sched-badge today">' + __("Today") + "</span>"
 		: "";
 
+	const state = isCancelled ? " is-cancelled" : days === 0 ? " is-today" : "";
+
+	// The rail and its bullet live on the wrapper, not the card: the card clips its own overflow
+	// to keep the expanded detail inside its rounded corners, which would cut a marker off.
 	return (
+		'<div class="sched-item' +
+		state +
+		'">' +
 		'<div class="sched-card' +
-		(isCancelled ? " is-cancelled" : days === 0 ? " is-today" : "") +
+		state +
 		'">' +
 		'<div class="sched-row">' +
 		'<div class="sched-when">' +
@@ -115,13 +147,15 @@ function renderCard(session) {
 		frappe.utils.escape_html(joinParts([session.lsg, session.district])) +
 		"</div></div>" +
 		'<div class="sched-meta">' +
-		frappe.utils.escape_html(formatTimeWindow(session)) +
+		frappe.utils.escape_html(
+			bandhu.session_ui.format_planned_window(session) || __("Time not set")
+		) +
 		(session.unit ? "<br>" + frappe.utils.escape_html(session.unit) : "") +
 		"</div>" +
-		'<i class="fa fa-chevron-down sched-caret"></i>' +
+		frappe.utils.icon("chevron-down", "sm", "", "", "current-color sched-caret") +
 		"</div>" +
 		renderDetail(session) +
-		"</div>"
+		"</div></div>"
 	);
 }
 
@@ -143,7 +177,7 @@ function renderSchedule(sessions) {
 function renderEmpty(message) {
 	return (
 		'<div class="empty-state">' +
-		'<i class="fa fa-calendar-o empty-state-icon"></i>' +
+		frappe.utils.icon("calendar-off", "xl", "", "", "current-color empty-state-icon") +
 		'<span class="empty-state-text">' +
 		frappe.utils.escape_html(message || __("You have no clinic sessions scheduled.")) +
 		"</span></div>"
@@ -187,7 +221,17 @@ frappe.pages["my-schedule"].on_page_load = function (wrapper) {
 		single_column: true,
 	});
 
-	page.set_secondary_action(__("Refresh"), () => loadSchedule(page));
+	page.set_secondary_action(__("Refresh"), refreshSchedule);
 
-	loadSchedule(page);
+	schedulePage = page;
 };
+
+async function refreshSchedule() {
+	await frappe.require(SESSION_UI_ASSET);
+	await bandhu.session_ui.refresh_page(schedulePage, loadSchedule);
+}
+
+// Desk keeps this page's DOM alive, so a schedule cancelled while the user was on another page
+// would still read as active on return. on_page_show also fires on the very first show
+// (frappe/public/js/frappe/views/pageview.js:104-107), so it is the only loader needed.
+frappe.pages["my-schedule"].on_page_show = refreshSchedule;

@@ -6,7 +6,8 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "employment_sector_name"
+  "employment_sector_name",
+  "is_major_sector"
  ],
  "fields": [
   {
@@ -14,6 +15,12 @@
    "fieldtype": "Data",
    "label": "Employment Sector Name",
    "unique": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_major_sector",
+   "fieldtype": "Check",
+   "label": "Is Major Sector?"
   }
  ],
  "grid_page_length": 50,

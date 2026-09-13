@@ -17,8 +17,8 @@ frappe.query_reports["Bandhu Tests Report"] = {
 		{
 			fieldname: "test_name",
 			label: __("Test"),
-			fieldtype: "Select",
-			options: ["", "Malaria", "Dengue", "Leptospirosis", "Hb", "GRBS"],
+			fieldtype: "Link",
+			options: "Bandhu Test",
 		},
 		{
 			fieldname: "result",

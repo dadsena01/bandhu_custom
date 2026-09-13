@@ -5,6 +5,7 @@ import frappe
 from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, add_years, nowtime, today
 
+from bandhu_app.bandhu_app.baseline_test_fixtures import ensure_baseline_fixtures
 from bandhu_app.bandhu_app.report.bandhu_tests_report.bandhu_tests_report import execute
 
 EXTRA_TEST_RECORD_DEPENDENCIES = []
@@ -16,59 +17,84 @@ class IntegrationTestTestsReport(IntegrationTestCase):
 	def setUpClass(cls):
 		super().setUpClass()
 
-		cls.clinic = frappe.get_all("Clinic", limit=1, pluck="name")[0]
-		cls.project = frappe.get_all("Bandhu Projects", limit=1, pluck="name")[0]
-		cls.appointment_type = frappe.get_all("Appointment Type", limit=1, pluck="name")[0]
-		cls.state = frappe.get_all("State", limit=1, pluck="name")[0]
+		baseline = ensure_baseline_fixtures()
+		cls.clinic = baseline["clinic"]
+		cls.project = baseline["project"]
+		cls.appointment_type = baseline["appointment_type"]
+		cls.state = baseline["state"]
 
-		cls.doctor = frappe.get_doc(
-			{"doctype": "Healthcare Practitioner", "first_name": "Tests Report Doctor", "status": "Active"}
-		).insert(ignore_permissions=True).name
+		cls.doctor = (
+			frappe.get_doc(
+				{
+					"doctype": "Healthcare Practitioner",
+					"first_name": "Tests Report Doctor",
+					"status": "Active",
+				}
+			)
+			.insert(ignore_permissions=True)
+			.name
+		)
 
-		cls.location = frappe.get_doc(
-			{
-				"doctype": "Bandhu Location",
-				"location_name": f"Tests Report Location {frappe.generate_hash(length=6)}",
-				"lsg": "Tests Report Panchayat",
-				"district": "Ernakulam",
-				"state": "Kerala",
-			}
-		).insert(ignore_permissions=True).name
+		cls.location = (
+			frappe.get_doc(
+				{
+					"doctype": "Bandhu Location",
+					"location_name": f"Tests Report Location {frappe.generate_hash(length=6)}",
+					"lsg": "Tests Report Panchayat",
+					"district": "Ernakulam",
+					"state": "Kerala",
+				}
+			)
+			.insert(ignore_permissions=True)
+			.name
+		)
 
 	def setUp(self):
 		# Every test filters on its own site: records created by one test are still
 		# visible to the next, so a shared site would make the row counts cumulative.
-		self.site = frappe.get_doc(
-			{
-				"doctype": "Site",
-				"site_name": f"Tests Report Worksite {frappe.generate_hash(length=6)}",
-				"location": self.location,
-			}
-		).insert(ignore_permissions=True).name
+		self.site = (
+			frappe.get_doc(
+				{
+					"doctype": "Site",
+					"site_name": f"Tests Report Worksite {frappe.generate_hash(length=6)}",
+					"location": self.location,
+				}
+			)
+			.insert(ignore_permissions=True)
+			.name
+		)
 
 	def _make_session(self, date=None):
-		return frappe.get_doc(
-			{
-				"doctype": "Bandhu Clinic Session",
-				"date": date or today(),
-				"clinic": self.clinic,
-				"site": self.site,
-				"project": self.project,
-				"assigned_doctor": self.doctor,
-				"status": "In Progress",
-			}
-		).insert(ignore_permissions=True).name
+		return (
+			frappe.get_doc(
+				{
+					"doctype": "Bandhu Clinic Session",
+					"date": date or today(),
+					"clinic": self.clinic,
+					"site": self.site,
+					"project": self.project,
+					"assigned_doctor": self.doctor,
+					"status": "In Progress",
+				}
+			)
+			.insert(ignore_permissions=True)
+			.name
+		)
 
 	def _make_patient(self, sex="Male", age_years=35):
-		return frappe.get_doc(
-			{
-				"doctype": "Patient",
-				"first_name": f"Tests Report Patient {frappe.generate_hash(length=8)}",
-				"sex": sex,
-				"dob": add_years(today(), -age_years),
-				"custom_native_state": self.state,
-			}
-		).insert(ignore_permissions=True).name
+		return (
+			frappe.get_doc(
+				{
+					"doctype": "Patient",
+					"first_name": f"Tests Report Patient {frappe.generate_hash(length=8)}",
+					"sex": sex,
+					"dob": add_years(today(), -age_years),
+					"custom_native_state": self.state,
+				}
+			)
+			.insert(ignore_permissions=True)
+			.name
+		)
 
 	def _make_encounter(self, session, tests, patient=None):
 		return frappe.get_doc(
@@ -149,11 +175,16 @@ class IntegrationTestTestsReport(IntegrationTestCase):
 			],
 		)
 
-		summary = {card["label"]: card["value"] for card in execute({
-			"from_date": today(),
-			"to_date": today(),
-			"site": self.site,
-		})[4]}
+		summary = {
+			card["label"]: card["value"]
+			for card in execute(
+				{
+					"from_date": today(),
+					"to_date": today(),
+					"site": self.site,
+				}
+			)[4]
+		}
 		self.assertEqual(summary["Tests Ordered"], 3)
 		self.assertEqual(summary["Tests Done"], 2)
 		self.assertEqual(summary["Positive"], 1)

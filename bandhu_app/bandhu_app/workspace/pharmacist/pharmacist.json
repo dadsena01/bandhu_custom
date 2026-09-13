@@ -1,7 +1,7 @@
 {
- "app": "frappe",
+ "app": "bandhu_app",
  "charts": [],
- "content": "[{\"id\":\"Pxr9eadgR1\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h3\\\">Pharmacist Module</span>\",\"col\":12}},{\"id\":\"ntNpvi8M-i\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"-YhD3nJcxq\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"JjYg_YcpqR\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Medicine Movement\",\"col\":12}},{\"id\":\"PH4weaJJrZ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Medicines\",\"col\":12}}]",
+ "content": "[{\"id\":\"Pxr9eadgR1\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h3\\\">Pharmacist Module</span>\",\"col\":12}},{\"id\":\"ntNpvi8M-i\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"-YhD3nJcxq\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"PH4weaJJrZ\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Medicines\",\"col\":12}}]",
  "creation": "2026-04-16 23:13:47.807606",
  "custom_blocks": [],
  "docstatus": 0,
@@ -33,19 +33,10 @@
  "shortcuts": [
   {
    "color": "Grey",
-   "doc_view": "List",
-   "label": "Medicine Movement",
-   "link_to": "Stock Entry",
-   "stats_filter": "[]",
-   "type": "DocType"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "List",
+   "doc_view": "",
    "label": "Medicines",
-   "link_to": "Item",
-   "stats_filter": "[]",
-   "type": "DocType"
+   "type": "URL",
+   "url": "/app/item?item_group=Drug"
   }
  ],
  "title": "Pharmacist",

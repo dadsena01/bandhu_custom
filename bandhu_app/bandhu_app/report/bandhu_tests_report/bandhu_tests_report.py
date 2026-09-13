@@ -1,5 +1,6 @@
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Coalesce
 from frappe.utils import getdate
 
 from bandhu_app.bandhu_app.utils.patient import age_group
@@ -18,9 +19,6 @@ def execute(filters=None):
 		return get_columns(), []
 
 	rows = build_rows(tests)
-	rows = apply_result_filter(rows, filters)
-	if not rows:
-		return get_columns(), []
 
 	return get_columns(), rows, None, build_chart(rows), build_summary(rows)
 
@@ -34,54 +32,67 @@ def validate_filters(filters):
 
 
 def fetch_tests(filters) -> list:
-	conditions = ["session.date between %(from_date)s and %(to_date)s"]
-	values = {"from_date": filters.from_date, "to_date": filters.to_date}
+	test = frappe.qb.DocType("Test Instructions")
+	encounter = frappe.qb.DocType("Patient Encounter")
+	session = frappe.qb.DocType("Bandhu Clinic Session")
 
-	for fieldname in ("project", "site", "unit", "clinic"):
-		if filters.get(fieldname):
-			conditions.append(f"session.{fieldname} = %({fieldname})s")
-			values[fieldname] = filters.get(fieldname)
-
-	if filters.get("location"):
-		conditions.append("site.location = %(location)s")
-		values["location"] = filters.location
-
-	if filters.get("test_name"):
-		conditions.append("test.test_name = %(test_name)s")
-		values["test_name"] = filters.test_name
-
-	return frappe.db.sql(
-		f"""
-		select
+	query = (
+		frappe.qb.from_(test)
+		.inner_join(encounter)
+		.on(encounter.name == test.parent)
+		.inner_join(session)
+		.on(session.name == encounter.custom_clinic_session)
+		.select(
 			session.date,
-			session.name as camp,
-			session.site as site_id,
+			session.name.as_("camp"),
+			session.site.as_("site_id"),
 			session.project,
-			session.unit as unit_id,
-			session.assigned_doctor as doctor_id,
-			encounter.name as encounter,
+			session.unit.as_("unit_id"),
+			session.assigned_doctor.as_("doctor_id"),
+			encounter.name.as_("encounter"),
 			encounter.patient,
 			test.test_name,
 			test.result_type,
-			test.result_value
-		from `tabTest Instructions` test
-		inner join `tabPatient Encounter` encounter on encounter.name = test.parent
-		inner join `tabBandhu Clinic Session` session on session.name = encounter.custom_clinic_session
-		left join `tabSite` site on site.name = session.site
-		where test.parenttype = 'Patient Encounter'
-			and encounter.docstatus < 2
-			and {" and ".join(conditions)}
-		order by session.date asc, encounter.name asc, test.idx asc
-		""",
-		values,
-		as_dict=True,
+			test.result_value,
+		)
+		.where(
+			(test.parenttype == "Patient Encounter")
+			& (encounter.docstatus < 2)
+			& (session.date >= filters.from_date)
+			& (session.date <= filters.to_date)
+		)
+		.orderby(session.date)
+		.orderby(encounter.name)
+		.orderby(test.idx)
 	)
+
+	for fieldname in ("project", "site", "unit", "clinic"):
+		if filters.get(fieldname):
+			query = query.where(session[fieldname] == filters.get(fieldname))
+
+	if filters.get("location"):
+		site = frappe.qb.DocType("Site")
+		query = query.left_join(site).on(site.name == session.site).where(site.location == filters.location)
+
+	if filters.get("test_name"):
+		query = query.where(test.test_name == filters.test_name)
+
+	if filters.get("result"):
+		query = query.where(result_condition(test, filters.result))
+
+	return query.run(as_dict=True)
+
+
+def result_condition(test, result: str):
+	"""Pending is the absence of a result, so it cannot be an equality like the rest."""
+	if result == PENDING:
+		return Coalesce(test.result_type, "") == ""
+
+	return test.result_type == result
 
 
 def build_rows(tests: list) -> list:
-	sites = fetch_map(
-		"Site", {test.site_id for test in tests if test.site_id}, ["site_name", "location"]
-	)
+	sites = fetch_map("Site", {test.site_id for test in tests if test.site_id}, ["site_name", "location"])
 	locations = fetch_map(
 		"Bandhu Location",
 		{site.location for site in sites.values() if site.location},
@@ -114,8 +125,7 @@ def build_rows(tests: list) -> list:
 				"district": location.district,
 				"project": test.project,
 				"unit": (units.get(test.unit_id) or frappe._dict()).unit_name or test.unit_id,
-				"doctor": (doctors.get(test.doctor_id) or frappe._dict()).practitioner_name
-				or test.doctor_id,
+				"doctor": (doctors.get(test.doctor_id) or frappe._dict()).practitioner_name or test.doctor_id,
 				"clinic_id": patient.custom_bandhu_id,
 				"patient": test.patient,
 				"patient_name": patient.patient_name,
@@ -129,14 +139,6 @@ def build_rows(tests: list) -> list:
 			}
 		)
 	return rows
-
-
-def apply_result_filter(rows: list, filters) -> list:
-	"""Pending is the absence of a result, so it cannot be a SQL equality like the rest."""
-	if not filters.get("result"):
-		return rows
-
-	return [row for row in rows if row["result"] == filters.result]
 
 
 def build_chart(rows: list) -> dict:
@@ -188,7 +190,13 @@ def build_summary(rows: list) -> list:
 def get_columns() -> list:
 	return [
 		{"fieldname": "date", "label": _("Date"), "fieldtype": "Date", "width": 100},
-		{"fieldname": "test_name", "label": _("Test"), "fieldtype": "Data", "width": 120},
+		{
+			"fieldname": "test_name",
+			"label": _("Test"),
+			"fieldtype": "Link",
+			"options": "Bandhu Test",
+			"width": 120,
+		},
 		{"fieldname": "result", "label": _("Result"), "fieldtype": "Data", "width": 100},
 		{"fieldname": "result_value", "label": _("Value"), "fieldtype": "Data", "width": 110},
 		{"fieldname": "clinic_id", "label": _("Clinic ID"), "fieldtype": "Data", "width": 120},

@@ -1,8 +1,8 @@
 import frappe
 from frappe import _
+from frappe.utils import flt
 
-from bandhu_app.bandhu_app.utils.patient import attach_compact_age
-from bandhu_app.bandhu_app.utils.patient_details import get_encounter_clinical_details, get_patient_details
+from bandhu_app.bandhu_app.utils.patient_details import get_patient_details, get_session_encounters
 from bandhu_app.bandhu_app.utils.session import find_active_session, find_upcoming_sessions
 
 
@@ -91,11 +91,16 @@ def get_upcoming_sessions() -> list:
 
 def load_session_for_status_change(session_name: str) -> dict:
 	require_session_access(session_name)
+	# for_update locks the row for the rest of this transaction, so a second request opening or
+	# closing the same camp waits here and then reads the committed status — without it both
+	# requests read Planned, both pass the guards below, and the second write silently replaces
+	# the first camp's start_time, which is what Session Report and "Camps Late To Open" read.
 	session_doc = frappe.db.get_value(
 		"Bandhu Clinic Session",
 		session_name,
 		["status", "date"],
 		as_dict=True,
+		for_update=True,
 	)
 	if not session_doc:
 		frappe.throw(_("Clinic session not found."))
@@ -105,7 +110,7 @@ def load_session_for_status_change(session_name: str) -> dict:
 	return session_doc
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def start_session(session_name: str) -> None:
 	session_doc = load_session_for_status_change(session_name)
 
@@ -128,7 +133,7 @@ def start_session(session_name: str) -> None:
 	)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def end_session(session_name: str) -> None:
 	session_doc = load_session_for_status_change(session_name)
 
@@ -142,42 +147,22 @@ def end_session(session_name: str) -> None:
 	)
 
 
-def get_encounters_with_details(session_name, workflow_state):
-	encounters = frappe.db.get_all(
-		"Patient Encounter",
-		filters={"custom_clinic_session": session_name, "custom_workflow_state": workflow_state},
-		fields=[
-			"name",
-			"patient",
-			"patient_name",
-			"patient_age",
-			"patient_sex",
-			"encounter_date",
-			"custom_workflow_state",
-		],
-		order_by="encounter_date desc, creation desc",
-	)
-	for encounter in encounters:
-		encounter.update(get_encounter_clinical_details(encounter.name))
-	return attach_compact_age(encounters)
-
-
 @frappe.whitelist()
 def get_patients_for_tests(session_name: str) -> list:
 	require_session_access(session_name)
-	return get_encounters_with_details(session_name, "Awaiting Test")
+	return get_session_encounters(session_name, "Awaiting Test")
 
 
 @frappe.whitelist()
 def get_patients_for_medicines(session_name: str) -> list:
 	require_session_access(session_name)
-	return get_encounters_with_details(session_name, "Awaiting Medicine")
+	return get_session_encounters(session_name, "Awaiting Medicine")
 
 
 @frappe.whitelist()
 def get_completed_patients(session_name: str) -> list:
 	require_session_access(session_name)
-	return get_encounters_with_details(session_name, "Completed")
+	return get_session_encounters(session_name, "Completed")
 
 
 @frappe.whitelist()
@@ -186,7 +171,7 @@ def get_patient_registration_details(encounter: str) -> dict:
 	return get_patient_details(doc.patient)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
 def submit_test_results(encounter: str, results: list | str) -> None:
 	doc = load_session_encounter(encounter)
 	if doc.custom_workflow_state != "Awaiting Test":
@@ -205,7 +190,49 @@ def submit_test_results(encounter: str, results: list | str) -> None:
 	doc.save(ignore_permissions=True)
 
 
-@frappe.whitelist()
+@frappe.whitelist(methods=["POST"])
+def record_vitals(
+	encounter: str,
+	height_cm: float | None = None,
+	weight_kg: float | None = None,
+	temperature: float | None = None,
+	pulse_rate: int | None = None,
+	spo2: int | None = None,
+	bp_systolic: int | None = None,
+	bp_diastolic: int | None = None,
+) -> None:
+	doc = load_session_encounter(encounter)
+	if doc.custom_workflow_state not in ("Awaiting Test", "Awaiting Medicine"):
+		frappe.throw(_("Vitals can only be recorded while the patient is with the nurse."))
+
+	values = [height_cm, weight_kg, temperature, pulse_rate, spo2, bp_systolic, bp_diastolic]
+	if not any(value is not None for value in values):
+		frappe.throw(_("Enter at least one vital sign."))
+	for value in values:
+		if value is not None and flt(value) <= 0:
+			frappe.throw(_("Vital signs must be positive numbers."))
+
+	if height_cm is not None:
+		doc.custom_height = height_cm
+	if weight_kg is not None:
+		doc.custom_weight = weight_kg
+	if temperature is not None:
+		doc.custom_temperature = temperature
+	if pulse_rate is not None:
+		doc.custom_pulse_rate = pulse_rate
+	if spo2 is not None:
+		doc.custom_spo2 = spo2
+	if bp_systolic is not None and bp_diastolic is not None:
+		doc.custom_blood_pressure = f"{bp_systolic}/{bp_diastolic}"
+
+	if doc.custom_height and doc.custom_weight:
+		height_m = flt(doc.custom_height) / 100
+		doc.custom_bmi = round(flt(doc.custom_weight) / (height_m * height_m), 2)
+
+	doc.save(ignore_permissions=True)
+
+
+@frappe.whitelist(methods=["POST"])
 def dispense_medicine(encounter: str, dispensed_rows: list | str | None = None) -> None:
 	doc = load_session_encounter(encounter)
 	if doc.custom_workflow_state != "Awaiting Medicine":

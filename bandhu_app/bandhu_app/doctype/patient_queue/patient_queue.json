@@ -50,7 +50,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Current Stage",
-   "options": "Waiting\nWith Doctor\nWith Nurse (Test)\nWith Nurse (Medicine)\nCompleted"
+   "options": "Waiting\nWith Doctor\nWith Nurse (Test)\nWith Nurse (Medicine)\nCompleted\nCancelled"
   },
   {
    "fieldname": "status",

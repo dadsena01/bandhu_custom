@@ -2,7 +2,7 @@
 	--max-w: var(--page-max-width, 900px);
 	max-width: var(--max-w);
 	margin: 0 auto;
-	padding: 0 var(--padding-md);
+	padding: 0 var(--padding-md) var(--padding-2xl);
 }
 
 .cad-dash .empty-state {
@@ -17,7 +17,8 @@
 }
 
 .cad-dash .empty-state .empty-state-icon {
-	font-size: 32px;
+	width: 32px;
+	height: 32px;
 	margin-bottom: 10px;
 	opacity: 0.4;
 }
@@ -45,12 +46,10 @@
 	color: var(--border-color);
 }
 
-.cad-dash .session-bar .session-dot {
-	font-size: 8px;
-}
-
-.cad-dash .session-bar .session-dot.running {
-	color: var(--green-500);
+/* Desk's own .icon ships `margin: 0 auto`; in this flex row those auto margins swallow the
+   free space and fling each icon away from the label it belongs to. */
+.cad-dash .session-bar .icon {
+	margin: 0;
 }
 
 .cad-dash .welcome {
@@ -90,8 +89,27 @@
 	gap: var(--padding-sm);
 }
 
-.cad-dash .search-row input {
+.cad-dash .search-field {
+	position: relative;
 	flex: 1;
+}
+
+.cad-dash .search-field input {
+	width: 100%;
+	padding-left: 34px;
+}
+
+/* Desk's .form-control is itself positioned, and it comes after the glyph in the DOM, so at
+   z-index auto its opaque background paints straight over it. pointer-events off so the glyph
+   never eats a tap meant for the field it sits in. */
+.cad-dash .search-field-icon {
+	position: absolute;
+	z-index: 1;
+	top: 50%;
+	left: 10px;
+	margin-top: -8px;
+	color: var(--text-muted);
+	pointer-events: none;
 }
 
 .cad-dash .cad-search-results {
@@ -138,6 +156,14 @@
 	color: var(--text-muted);
 }
 
+.cad-dash .patient-result-row .pr-actions,
+.cad-dash .queue-row-actions {
+	display: flex;
+	gap: 6px;
+	flex-shrink: 0;
+	justify-content: flex-end;
+}
+
 .cad-dash .cad-register-section {
 	margin-bottom: var(--margin-xl);
 }
@@ -167,13 +193,41 @@
 	margin-bottom: 4px;
 }
 
-.cad-dash .sex-btn-group {
+.cad-dash .required-mark {
+	color: var(--danger);
+}
+
+.cad-dash .field-note {
+	font-size: var(--text-xs);
+	color: var(--text-muted);
+}
+
+.cad-dash .register-grid .field-wide {
+	grid-column: 1 / -1;
+}
+
+.cad-dash .tab-group-wrap {
+	grid-column: 1 / -1;
+}
+
+.cad-dash .tab-btn-group {
 	display: flex;
+	flex-wrap: wrap;
 	gap: 8px;
 }
 
-.cad-dash .sex-btn {
-	flex: 1;
+.cad-dash .tab-btn {
+	flex: 1 1 auto;
+	min-width: 100px;
+}
+
+.cad-dash .other-picker,
+.cad-dash .detail-field {
+	margin-top: 8px;
+}
+
+.cad-dash .form-control[hidden] {
+	display: none !important;
 }
 
 .cad-dash .register-actions {
@@ -193,8 +247,11 @@
 	margin-top: var(--margin-sm);
 }
 
+/* Frappe's own templates/styles/standard.css sets `.table { margin: 20px 0 }`; zeroing only
+   the bottom leaves that top margin showing as an empty strip inside .table-wrap's border,
+   above the header row. */
 .cad-dash .table {
-	margin-bottom: 0;
+	margin: 0;
 	min-width: 400px;
 }
 
@@ -246,4 +303,30 @@
 	.cad-dash .table th {
 		padding: 8px 10px;
 	}
+}
+
+.bandhu-load-error {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--margin-md);
+	max-width: var(--page-max-width, 1000px);
+	margin: var(--margin-md) auto;
+	padding: var(--padding-2xl) var(--padding-md);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius-md);
+	background: var(--bg-color);
+	color: var(--text-muted);
+	text-align: center;
+}
+
+.bandhu-load-error .load-error-icon {
+	width: 32px;
+	height: 32px;
+	opacity: 0.4;
+}
+
+.bandhu-load-error .load-error-retry {
+	min-height: 44px;
+	padding: 0 var(--padding-lg);
 }

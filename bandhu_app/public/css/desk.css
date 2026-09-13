@@ -1,0 +1,37 @@
+/* Desk leaves 27px under a workspace's last widget — --padding-sm on
+   .layout-main-section plus the 20px floor Frappe forces on editor.js's
+   redactor — which reads as the page running off the bottom of the viewport.
+   Matches the --padding-2xl footer the Bandhu Desk pages already use.
+   Listed per workspace rather than on [data-page-route="Workspaces"] so the
+   other installed apps' workspaces keep Desk's own spacing. */
+body:is(
+	[data-route="Workspaces/Admin"],
+	[data-route="Workspaces/Bandhu"],
+	[data-route="Workspaces/CAD"],
+	[data-route="Workspaces/Dashboard"],
+	[data-route="Workspaces/Doctor"],
+	[data-route="Workspaces/Inventory"],
+	[data-route="Workspaces/Nurse"],
+	[data-route="Workspaces/Pharmacist"],
+	[data-route="Workspaces/Referrals"]
+) [data-page-route="Workspaces"] .layout-main-section {
+	padding-bottom: var(--padding-2xl);
+}
+
+/* Desk's .icon is an inline-block whose baseline is its bottom edge, so an icon
+   set beside a label rides above the label's optical centre. Every Bandhu page
+   builds its buttons that way, so centre them here rather than per page; the
+   gap replaces the literal space the markup used to carry. */
+:is(
+	.cad-dash,
+	.doctor-dash,
+	.nurse-dash,
+	.my-schedule,
+	.sched-wizard,
+	.staff-onboarding-dash
+) .btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--margin-xs);
+}

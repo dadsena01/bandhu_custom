@@ -43,5 +43,7 @@ class Unit(Document):
 
 		if frappe.db.exists("Patient", {"custom_registered_unit": self.name}):
 			frappe.throw(
-				_("Clinic IDs have already been issued by this unit, so its numeric code can no longer be changed.")
+				_(
+					"Clinic IDs have already been issued by this unit, so its numeric code can no longer be changed."
+				)
 			)

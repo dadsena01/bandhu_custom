@@ -7,6 +7,7 @@ import frappe
 from frappe.tests import IntegrationTestCase
 from frappe.utils import add_days, today
 
+from bandhu_app.bandhu_app.baseline_test_fixtures import ensure_baseline_fixtures
 from bandhu_app.bandhu_app.page.new_schedule.new_schedule import (
 	as_draft,
 	clock_value,
@@ -41,16 +42,17 @@ class IntegrationTestNewSchedule(IntegrationTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()
-		cls.clinic = frappe.get_all("Clinic", limit=1, pluck="name")[0]
-		cls.site = frappe.get_all("Site", limit=1, pluck="name")[0]
-		cls.doctor = frappe.get_all(
-			"Healthcare Practitioner", filters={"custom_role": "Doctor"}, limit=1, pluck="name"
-		)[0]
+		baseline = ensure_baseline_fixtures()
+		cls.clinic = baseline["clinic"]
+		cls.site = baseline["site"]
+		cls.unit = baseline["unit"]
+		cls.doctor = baseline["doctor"]
 
 	def wizard_values(self, **overrides):
 		values = {
 			"site": self.site,
 			"clinic": self.clinic,
+			"unit": self.unit,
 			"frequency": "Weekly",
 			"weekdays": ["Monday", "Thursday"],
 			"planned_start_time": "09:30:00",
@@ -92,19 +94,21 @@ class IntegrationTestNewSchedule(IntegrationTestCase):
 		self.assertEqual(result["dates"], [])
 		self.assertEqual(result["total"], 0)
 
-	def test_create_makes_the_schedule_and_its_sessions_in_one_step(self):
+	def test_create_builds_every_camp_the_wizard_promised(self):
 		result = create_schedule(self.wizard_values())
 
 		self.assertTrue(frappe.db.exists("Bandhu Session Schedule", result["name"]))
-		self.assertTrue(result["created"])
+		self.assertTrue(result["scheduled"])
+		# `scheduled` is read off the pattern because the camps are built by a background job.
+		# It still has to match what that job goes on to create.
 		self.assertEqual(
-			result["created"],
+			result["scheduled"],
 			frappe.db.count("Bandhu Clinic Session", {"session_schedule": result["name"]}),
 		)
 
 	def test_preview_reports_a_doctor_already_booked_elsewhere(self):
 		booked = create_schedule(self.wizard_values(assigned_doctor=self.doctor))
-		self.assertTrue(booked["created"])
+		self.assertTrue(booked["scheduled"])
 
 		result = preview_schedule(self.wizard_values(assigned_doctor=self.doctor))
 

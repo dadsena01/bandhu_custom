@@ -44,5 +44,7 @@ class BandhuLocation(Document):
 
 		if frappe.db.exists("Patient", {"custom_registered_lsg": self.name}):
 			frappe.throw(
-				_("Clinic IDs have already been issued at this location, so its numeric code can no longer be changed.")
+				_(
+					"Clinic IDs have already been issued at this location, so its numeric code can no longer be changed."
+				)
 			)

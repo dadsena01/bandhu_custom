@@ -1,3 +1,7 @@
+/* global bandhu */
+
+const SESSION_UI_ASSET = "/assets/bandhu_app/js/session_ui.js";
+
 let formOptions = { roles: [], genders: [] };
 
 function renderSelectField(name, label, optionsKey, required) {
@@ -169,5 +173,10 @@ frappe.pages["staff-onboarding"].on_page_load = function (wrapper) {
 		single_column: true,
 	});
 
-	loadDashboard(page);
+	// No on_page_show reload here: this page holds a half-filled form, and re-running the load on
+	// every return would throw away whatever the admin had already entered.
+	(async () => {
+		await frappe.require(SESSION_UI_ASSET);
+		await bandhu.session_ui.refresh_page(page, loadDashboard);
+	})();
 };
